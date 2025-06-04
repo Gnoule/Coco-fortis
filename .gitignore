@@ -12,8 +12,8 @@ env/
 ENV/
 
 # Visual output
-trainingVisuel/
-*.png
+# trainingVisuel/
+# *.png
 
 # IDE / Editor
 .vscode/
