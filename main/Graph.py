@@ -3,6 +3,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import math
 from datetime import datetime
+from collections import defaultdict
 
 class Graph:
 
@@ -203,45 +204,43 @@ class Graph:
 
     def HasDuplicateShapes(self):
 
-        def normalize(pixels):
-            # Center around (0,0) and sort
-            min_x = min(p[0] for p in pixels)
-            min_y = min(p[1] for p in pixels)
-            return sorted([(x - min_x, y - min_y) for x, y in pixels])
-
-        def get_rotated_forms(node):
-            rotations = []
-            original = node.GetPixelPositions()
-            x_sum = sum(p[0] for p in original)
-            y_sum = sum(p[1] for p in original)
-            n = len(original)
-            center = (x_sum / n, y_sum / n)
-
-            for i in range(4):
-                angle = i * (math.pi / 2)  # 0, 90, 180, 270
-                rotated = [Node.Rotate(center, p, angle) for p in original]
-                rotations.append(normalize(rotated))
-            return rotations
-
-        normalized_nodes = []
+        shape_groups = defaultdict(list)  # Maps normalized shape → list of nodes with that shape
 
         for node in self.nodes:
-            rotated_shapes = get_rotated_forms(node)
+            # Get all normalized rotations of this node
+            rotated_shapes = node.GetNormalizedRotations()
 
-            for other_shapes in normalized_nodes:
-                if any(shape in other_shapes for shape in rotated_shapes):
-                    return True  # Duplicate found
+            matched = False
+            # Compare against all known shape keys
+            for key_shape in shape_groups.keys():
+                if any(rot == list(key_shape) for rot in rotated_shapes):
+                    shape_groups[key_shape].append(node)
+                    matched = True
+                    break
 
-            normalized_nodes.append(rotated_shapes)
+            if not matched:
+                # First time we see this shape, store the first rotation as key
+                shape_groups[tuple(rotated_shapes[0])] = [node]
 
-        return False
+        # Extract groups that contain repeated shapes
+        repeated_groups = [group for group in shape_groups.values() if len(group) > 1]
+
+        print(f"Number of repeated shape groups: {len(repeated_groups)}")
+        for group in repeated_groups:
+            print(f"Shape occurs {len(group)} times:")
+            for node in group:
+                print(f" - {node.GetPixelPositions()}")
+
+        return len(repeated_groups) > 0
+
 
 grille = [
-    [0, 0, 0, 0, 0],
-    [1, 1, 1, 0, 0],
-    [1, 0, 0, 0, 1],
-    [0, 0, 0, 1, 1],
-    [0, 0, 0, 0, 1],
+    [0, 0, 0, 0, 0, 1],
+    [1, 1, 1, 0, 1, 1],
+    [0, 1, 0, 0, 0, 1],
+    [0, 0, 0, 0, 0, 0],
+    [0, 1, 1, 1, 0, 0],
+    [0, 0, 1, 0, 0, 0],
 ]
 startTime = datetime.now()
 graph = Graph(grille)
