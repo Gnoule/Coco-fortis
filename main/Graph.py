@@ -1,6 +1,7 @@
 from Nodes import Node
 import networkx as nx
 import matplotlib.pyplot as plt
+from datetime import datetime
 
 class Graph:
 
@@ -131,7 +132,7 @@ class Graph:
                     if (grid[pos_tested[1]][pos_tested[0]] != 0 and pos_tested not in pixels):
                         if pos_tested in pixels_associated:
                             # we associate current node to the node found
-                            node.AddAssociatedNode(pixels_associated[pos_tested])
+                            node.AddAssociatedNode(pixels_associated[pos_tested], "HORIZONTAL")
                             break 
                 
                 # LEFT DIRECTION
@@ -139,7 +140,7 @@ class Graph:
                     pos_tested = (x, pos[1])
                     if (grid[pos_tested[1]][pos_tested[0]] != 0 and pos_tested not in pixels):
                         if pos_tested in pixels_associated:
-                            node.AddAssociatedNode(pixels_associated[pos_tested])
+                            node.AddAssociatedNode(pixels_associated[pos_tested], "HORIZONTAL")
                             break
 
                 # DOWN DIRECTION        
@@ -147,7 +148,7 @@ class Graph:
                     pos_tested = (pos[0], y)
                     if (grid[pos_tested[1]][pos_tested[0]] != 0 and pos_tested not in pixels):
                         if pos_tested in pixels_associated:
-                            node.AddAssociatedNode(pixels_associated[pos_tested])
+                            node.AddAssociatedNode(pixels_associated[pos_tested], "VERTICAL")
                             break
 
                 # UP DIRECTION        
@@ -155,49 +156,66 @@ class Graph:
                     pos_tested = (pos[0], y)
                     if (grid[pos_tested[1]][pos_tested[0]] != 0 and pos_tested not in pixels):
                         if pos_tested in pixels_associated:
-                            node.AddAssociatedNode(pixels_associated[pos_tested])
+                            node.AddAssociatedNode(pixels_associated[pos_tested], "VERTICAL")
                             break
         print(self.nodes)
+
+
+
+    def GetNodePositions(self):
+        max_y = max(node.GetApproximatePixelPos()[1] for node in self.nodes)
+        return {node: (node.GetApproximatePixelPos()[0], max_y - node.GetApproximatePixelPos()[1]) for node in self.nodes}
+
+
 
 
     # function to create the graphical graph
     def BuildGraphFromList(self, nodes):
         G = nx.Graph()
-        seen = set()
 
-        # foreach node, we add it to the nx graph type
         for node in nodes:
-            if node not in seen:
-                G.add_node(node, color=node.color)
-                seen.add(node)
-            for neighbor in node.associated_nodes:
-                G.add_node(neighbor, color=neighbor.color)
-                G.add_edge(node, neighbor)
+            G.add_node(node, color=node.color, size=node.size)
+
+            for neighbor, direction in node.associated_nodes:
+                G.add_node(neighbor, color=neighbor.color, size=neighbor.size)
+                G.add_edge(node, neighbor, label=direction)
+        
         return G
+
 
     # function to display graph
     def ShowGraph(self):
-        # create graphical graph
         graph = self.BuildGraphFromList(self.nodes)
-        pos = nx.spring_layout(graph)
-        node_colors = [data['color'] for _, data in graph.nodes(data=True)]
+        pos = self.GetNodePositions()
 
-        # draw graph
-        nx.draw(graph, pos, with_labels=True, node_color=node_colors, edge_color="gray",
-                node_size=1000, font_size=12)
+        node_colors = [data['color'] for _, data in graph.nodes(data=True)]
+        labels = {node: data['size'] for node, data in graph.nodes(data=True)}
+        edge_labels = {(u, v): data['label'] for u, v, data in graph.edges(data=True)}
+    
+        nx.draw(graph, pos, labels=labels, node_color=node_colors, node_size=1000, font_size=12)
+        nx.draw_networkx_edge_labels(graph, pos, edge_labels=edge_labels, font_color='gray')
+
+        #plt.gca().invert_xaxis()
+        #plt.gca().invert_yaxis()
+        
+        plt.axis('equal')  # respect des proportions
         plt.show()
 
 
 
 
+
+
+
 grille = [
-    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0],
     [1, 1, 0, 0, 1],
     [0, 0, 0, 1, 1],
     [1, 0, 0, 0, 1],
 ]
-
+startTime = datetime.now()
 graph = Graph(grille)
+print(datetime.now() - startTime)
 graph.ShowGraph()
 input = ("wait")
