@@ -1,6 +1,7 @@
 from Nodes import Node
 import networkx as nx
 import matplotlib.pyplot as plt
+import math
 
 class Graph:
 
@@ -10,6 +11,7 @@ class Graph:
         self.CreateNode(grid, 'NEIGHBOR')
         #then, we create the edges of the graph
         self.CreateEdges(grid)
+        print(self.HasDuplicateShapes())
 
 
     # function to create the nodes of the graph (not the edges)
@@ -185,15 +187,52 @@ class Graph:
                 node_size=1000, font_size=12)
         plt.show()
 
+    def HasDuplicateShapes(self):
+
+        def normalize(pixels):
+            # Center around (0,0) and sort
+            min_x = min(p[0] for p in pixels)
+            min_y = min(p[1] for p in pixels)
+            return sorted([(x - min_x, y - min_y) for x, y in pixels])
+
+        def get_rotated_forms(node):
+            rotations = []
+            original = node.GetPixelPositions()
+            x_sum = sum(p[0] for p in original)
+            y_sum = sum(p[1] for p in original)
+            n = len(original)
+            center = (x_sum / n, y_sum / n)
+
+            for i in range(4):
+                angle = i * (math.pi / 2)  # 0, 90, 180, 270
+                rotated = [Node.Rotate(center, p, angle) for p in original]
+                rotations.append(normalize(rotated))
+            return rotations
+
+        normalized_nodes = []
+
+        for node in self.nodes:
+            rotated_shapes = get_rotated_forms(node)
+
+            for other_shapes in normalized_nodes:
+                if any(shape in other_shapes for shape in rotated_shapes):
+                    return True  # Duplicate found
+
+            normalized_nodes.append(rotated_shapes)
+
+        return False
+
+
+
 
 
 
 grille = [
     [0, 0, 0, 0, 0],
-    [1, 0, 0, 0, 0],
-    [1, 1, 0, 0, 1],
-    [0, 0, 0, 1, 1],
+    [1, 1, 1, 0, 0],
     [1, 0, 0, 0, 1],
+    [0, 0, 0, 1, 1],
+    [0, 0, 0, 0, 1],
 ]
 
 graph = Graph(grille)
