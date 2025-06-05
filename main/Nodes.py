@@ -10,16 +10,20 @@ class Node:
         self.pixel_positions = pixel_position
 
 
-    def AddAssociatedNode(self, new_node):
+    # connection_type = HORIZONTAL OR VERTICAL
+    def AddAssociatedNode(self, new_node, connection_type):
         if (new_node in self.associated_nodes):
             return
-        self.associated_nodes.append(new_node)
+        self.associated_nodes.append((new_node, connection_type))
 
     def GetAssociatedNode(self):
         return self.associated_nodes
     
     def GetPixelPositions(self):
         return self.pixel_positions
+
+    def GetApproximatePixelPos(self):
+        return self.pixel_positions[0]
 
     def BiggerSize(self, size):
         if (size >= self.size):
@@ -62,18 +66,18 @@ class Node:
 #Test Area
 
 # Create a square node centered around (1, 1)
-node = Node([(0, 0), (0, 2), (2, 2), (2, 0)])
-node.size = len(node.pixel_positions)
-node.color = 'BLUE'
+# node = Node([(0, 0), (0, 2), (2, 2), (2, 0)])
+# node.size = len(node.pixel_positions)
+# node.color = 'BLUE'
 
-print("Before rotation :")
-for p in node.pixel_positions:
-    print(p)
+# print("Before rotation :")
+# for p in node.pixel_positions:
+#     print(p)
 
-# 270-degree rotation (3pi/2 radians)
-node.RotateNode((3*math.pi)/2)
+# # 270-degree rotation (3pi/2 radians)
+# node.RotateNode((3*math.pi)/2)
 
-print("\nAfter 270 rotation :")
-for p in node.pixel_positions:
-    print(p)
+# print("\nAfter 270 rotation :")
+# for p in node.pixel_positions:
+#     print(p)
 
