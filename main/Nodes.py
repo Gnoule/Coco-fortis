@@ -62,8 +62,7 @@ class Node:
 #Test Area
 
 # Create a square node centered around (1, 1)
-node = Node()
-node.pixel_positions = [(0, 0), (0, 2), (2, 2), (2, 0)]
+node = Node([(0, 0), (0, 2), (2, 2), (2, 0)])
 node.size = len(node.pixel_positions)
 node.color = 'BLUE'
 

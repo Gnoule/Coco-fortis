@@ -48,8 +48,6 @@ class Graph:
                     self.CreateNodeWithColor(grid, pos_tested, pixel_found, pos_already_visited)
 
 
-
-
     # current_pos[0] -> x
     # current_pos[1] -> y
     # pixel found = position of pixels (local to this node)
@@ -83,7 +81,6 @@ class Graph:
             pixels = node.GetPixelPositions()
             for pos in pixels:
                 pixels_associated[pos] = node
-
 
         i = 0
         for node in self.nodes:
