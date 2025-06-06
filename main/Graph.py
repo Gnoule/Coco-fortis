@@ -2,11 +2,14 @@ from Nodes import Node
 import networkx as nx
 import matplotlib.pyplot as plt
 from datetime import datetime
+import numpy as np
+from matplotlib import colors
 
 class Graph:
 
     def __init__(self, grid):
         self.nodes = []
+        self.grid = grid
         # first, we create the nodes (by giving the type of graph construction)
         self.CreateNode(grid, 'NEIGHBOR')
         #then, we create the edges of the graph
@@ -25,16 +28,18 @@ class Graph:
                 if ((x,y) in pos_already_visited or (grid[y][x] == 0)):
                     continue
                 pixel_found = [(x,y)]
-                pixel_value = [(x,y)]
+                pixel_color_found = {}
+                pixel_value = grid[y][x]
                 # if we find a new node, we are going to find all pixels associated based on type of search
                 # the functions are recursive. 
                 #note: pixel_found passed through REFERENCE (no return to the fonctions)
                 if type == "NEIGHBOR":
-                    self.CreateNodeWithNeighbors(grid, [x,y], pixel_found, pos_already_visited)
+                    pixel_color_found[(x,y)] = pixel_value
+                    self.CreateNodeWithNeighbors(grid, [x,y], pixel_found, pixel_color_found, pos_already_visited)
                 elif type == "COLOR":
                     self.CreateNodeWithColor(grid, [x,y], pixel_found, pixel_value, pos_already_visited)
                 # end of the search, we add the pixels to the node created
-                node = Node(pixel_found) 
+                node = Node(pixel_found, pixel_color_found) 
                 self.nodes.append(node)
         print(pos_already_visited)
 
@@ -71,9 +76,10 @@ class Graph:
     # current_pos[0] -> x
     # current_pos[1] -> y
     # pixel found = position of pixels (local to this node)
+    # pixel color found = value of pixel (local to this node)
     # pos alreay visited = position of pixels already visited (global au parcours de la grid)
     # SAME AS CreateNodeWithColor,check for this function for more comments
-    def CreateNodeWithNeighbors(self, grid, current_pos, pixel_found, pos_already_visited):
+    def CreateNodeWithNeighbors(self, grid, current_pos, pixel_found, pixel_color_found, pos_already_visited):
         for y in range (-1, 2):
             for x in range (-1, 2):
                 if (x == 0 and y == 0):
@@ -91,9 +97,11 @@ class Graph:
                 if (actual_value != 0 and pos_tested not in pixel_found):
                     # we add to pixel_found (passed throug hreference)
                     pixel_found.append(pos_tested)
+                    # we add the color of pixel (key=pos value=color)
+                    pixel_color_found[pos_tested] = actual_value
                     pos_already_visited.append(pos_tested)
                     # recursive call to check position
-                    self.CreateNodeWithNeighbors(grid, pos_tested, pixel_found, pos_already_visited)
+                    self.CreateNodeWithNeighbors(grid, pos_tested, pixel_found, pixel_color_found, pos_already_visited)
 
     def CreateNodeHorizontaly(self, grid):
         pass
@@ -201,6 +209,58 @@ class Graph:
 
 
 
+    def ShowGrid(self):
+        array = np.array(self.grid)
+
+        cmap = colors.ListedColormap(['black', 'red', 'green', 'blue', 'orange', 'purple'])
+        bounds = [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5]
+        norm = colors.BoundaryNorm(bounds, cmap.N)
+
+        # Afficher la grille
+        plt.imshow(array, cmap=cmap, norm=norm)
+
+        # Ajouter une grille optionnelle
+        plt.grid(which='both', color='gray', linewidth=0.5)
+        plt.xticks(np.arange(len(grille[0])))
+        plt.yticks(np.arange(len(grille)))
+        plt.gca().invert_yaxis()  # pour garder (0,0) en haut à gauche
+        plt.gca().set_aspect('equal')
+
+        plt.show()
+
+
+
+    ##### UTILITARIES (COMPARE BETWEEN TWO GRAPHS) #######
+
+    @staticmethod
+    def CompareTwoNodesPosition(grid_input, grid_output, node_input, node_output):
+        pass
+
+    @staticmethod
+    def CompareTwoNodesColor(grid_input, grid_output, node_input, node_output):
+        pass
+
+    @staticmethod
+    def CompareTwoNodesSize(grid_input, grid_output, node_input, node_output):
+        pass
+
+    @staticmethod
+    def CompareGridSize(grid_input, grid_output):
+        pass
+
+    @staticmethod
+    def CheckNodeOnOutput(grid_input, grid_output, node_input):
+        pass
+
+    @staticmethod
+    def CheckNodeSizeOnOutput(grid_input, grid_output):
+        pass
+
+
+
+    
+
+
 
 
 
@@ -209,11 +269,12 @@ grille = [
     [0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0],
     [1, 1, 0, 0, 1],
-    [0, 0, 0, 1, 1],
-    [1, 0, 0, 0, 1],
+    [0, 0, 0, 1, 2],
+    [1, 0, 0, 0, 2],
 ]
 startTime = datetime.now()
 graph = Graph(grille)
+for node in graph.nodes:
+    print('yes = ', node.CheckUniColor()) 
 print(datetime.now() - startTime)
-graph.ShowGraph()
-input = ("wait")
+graph.ShowGrid()
