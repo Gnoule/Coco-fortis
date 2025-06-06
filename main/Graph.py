@@ -210,10 +210,6 @@ class Graph:
         plt.axis('equal')  # respect des proportions
         plt.show()
 
-    def HasDuplicateShapes(self):
-
-        shape_groups = defaultdict(list)  # Maps normalized shape → list of nodes with that shape
-
     def ShowGrid(self):
         array = np.array(self.grid)
 
@@ -264,7 +260,8 @@ class Graph:
 
 
     
-
+    def HasDuplicateShapes(self):
+        shape_groups = defaultdict(list)  # Maps normalized shape → list of nodes with that shape
 
         for node in self.nodes:
             # Get all normalized rotations of this node
