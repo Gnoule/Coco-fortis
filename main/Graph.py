@@ -1,9 +1,11 @@
 from Nodes import Node
 import networkx as nx
 import matplotlib.pyplot as plt
+import math
 from datetime import datetime
 import numpy as np
 from matplotlib import colors
+from collections import defaultdict
 
 class Graph:
 
@@ -14,6 +16,7 @@ class Graph:
         self.CreateNode(grid, 'NEIGHBOR')
         #then, we create the edges of the graph
         self.CreateEdges(grid)
+        print(self.HasDuplicateShapes())
 
 
     # function to create the nodes of the graph (not the edges)
@@ -207,7 +210,9 @@ class Graph:
         plt.axis('equal')  # respect des proportions
         plt.show()
 
+    def HasDuplicateShapes(self):
 
+        shape_groups = defaultdict(list)  # Maps normalized shape → list of nodes with that shape
 
     def ShowGrid(self):
         array = np.array(self.grid)
@@ -261,16 +266,41 @@ class Graph:
     
 
 
+        for node in self.nodes:
+            # Get all normalized rotations of this node
+            rotated_shapes = node.GetNormalizedRotations()
 
+            matched = False
+            # Compare against all known shape keys
+            for key_shape in shape_groups.keys():
+                if any(rot == list(key_shape) for rot in rotated_shapes):
+                    shape_groups[key_shape].append(node)
+                    matched = True
+                    break
 
+            if not matched:
+                # First time we see this shape, store the first rotation as key
+                shape_groups[tuple(rotated_shapes[0])] = [node]
+
+        # Extract groups that contain repeated shapes
+        repeated_groups = [group for group in shape_groups.values() if len(group) > 1]
+
+        print(f"Number of repeated shape groups: {len(repeated_groups)}")
+        for group in repeated_groups:
+            print(f"Shape occurs {len(group)} times:")
+            for node in group:
+                print(f" - {node.GetPixelPositions()}")
+
+        return len(repeated_groups) > 0
 
 
 grille = [
-    [0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0],
-    [1, 1, 0, 0, 1],
-    [0, 0, 0, 1, 2],
-    [1, 0, 0, 0, 2],
+    [0, 0, 0, 0, 0, 1],
+    [1, 1, 1, 0, 1, 1],
+    [0, 1, 0, 0, 0, 1],
+    [0, 0, 0, 0, 0, 0],
+    [0, 1, 1, 1, 0, 0],
+    [0, 0, 1, 0, 0, 0],
 ]
 startTime = datetime.now()
 graph = Graph(grille)

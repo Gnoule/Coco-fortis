@@ -48,6 +48,7 @@ class Node:
             return True
     
     
+    # Start of functions that will take care of rotations
     def Rotate(origin, point, angle, decimals=5):
         def clean(value):
             value = round(value, decimals)
@@ -64,41 +65,21 @@ class Node:
         qx = ox + math.cos(angle) * (px - ox) - math.sin(angle) * (py - oy)
         qy = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)
         return clean(qx), clean(qy)
+    
+    def GetNormalizedRotations(self):
 
+        def normalize(pixels):
+            min_x = min(p[0] for p in pixels)
+            min_y = min(p[1] for p in pixels)
+            return sorted([(x - min_x, y - min_y) for x, y in pixels])
 
-    def RotateNode(self, angle):
-        if not self.pixel_positions:
-            return
+        center_x = sum(x for x, _ in self.pixel_positions) / self.size
+        center_y = sum(y for _, y in self.pixel_positions) / self.size
+        center = (center_x, center_y)
 
-        # Calculating the node center (barycentre)
-        x_sum = sum(p[0] for p in self.pixel_positions)
-        y_sum = sum(p[1] for p in self.pixel_positions)
-        n = self.size
-        center = (x_sum / n, y_sum / n)
-
-        # Apply rotation to each pixel
-        self.pixel_positions = [Node.Rotate(center, p, angle) for p in self.pixel_positions]
-
-    # check if form is fillet or not (if has hole in it)
-    def CheckIfHole():
-        pass
-
-
-#Test Area
-
-# Create a square node centered around (1, 1)
-# node = Node([(0, 0), (0, 2), (2, 2), (2, 0)])
-# node.size = len(node.pixel_positions)
-# node.color = 'BLUE'
-
-# print("Before rotation :")
-# for p in node.pixel_positions:
-#     print(p)
-
-# # 270-degree rotation (3pi/2 radians)
-# node.RotateNode((3*math.pi)/2)
-
-# print("\nAfter 270 rotation :")
-# for p in node.pixel_positions:
-#     print(p)
-
+        rotations = []
+        for i in range(4):
+            angle = i * (math.pi / 2)
+            rotated = [Node.Rotate(center, p, angle) for p in self.pixel_positions]
+            rotations.append(normalize(rotated))
+        return rotations
