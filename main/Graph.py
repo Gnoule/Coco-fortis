@@ -2,7 +2,6 @@ from Nodes import Node
 import networkx as nx
 import matplotlib.pyplot as plt
 import math
-from datetime import datetime
 import numpy as np
 from matplotlib import colors
 from collections import defaultdict
@@ -196,7 +195,7 @@ class Graph:
         graph = self.BuildGraphFromList(self.nodes)
         pos = self.GetNodePositions()
 
-        node_colors = [data['color'] for _, data in graph.nodes(data=True)]
+        node_colors = [data.get('color') or 'gray' for _, data in graph.nodes(data=True)]
         labels = {node: data['size'] for node, data in graph.nodes(data=True)}
         edge_labels = {(u, v): data['label'] for u, v, data in graph.edges(data=True)}
     
@@ -209,15 +208,17 @@ class Graph:
         plt.axis('equal')  # respect des proportions
         plt.show()
 
+
     def ShowGrid(self):
         array = np.array(self.grid)
+        rows, cols = array.shape
 
         cmap = colors.ListedColormap(['black', 'red', 'green', 'blue', 'orange', 'purple'])
         bounds = [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5]
         norm = colors.BoundaryNorm(bounds, cmap.N)
 
-        # Afficher la grille
-        plt.imshow(array, cmap=cmap, norm=norm)
+        fig, ax = plt.subplots(figsize=(cols, rows))
+        im = ax.imshow(array, cmap=cmap, norm=norm)
 
         # Ajouter une grille optionnelle
         plt.grid(which='both', color='gray', linewidth=0.5)
@@ -225,8 +226,27 @@ class Graph:
         plt.yticks(np.arange(len(self.grid)))
         plt.gca().invert_yaxis()  # pour garder (0,0) en haut à gauche
         plt.gca().set_aspect('equal')
+        # Ticks exactement sur les bords des cellules
+        ax.set_xticks(np.arange(cols))
+        ax.set_yticks(np.arange(rows))
+
+        # Affichage des labels
+        ax.set_xticklabels(np.arange(cols))
+        ax.set_yticklabels(np.arange(rows))
+
+        # Grille aux bonnes positions
+        ax.set_xticks(np.arange(-0.5, cols, 1), minor=True)
+        ax.set_yticks(np.arange(-0.5, rows, 1), minor=True)
+        ax.grid(which='minor', color='gray', linestyle='-', linewidth=0.5)
+
+        # Réglages visuels
+        ax.tick_params(top=False, bottom=True, labeltop=False, labelbottom=True)
+        ax.invert_yaxis()
+        ax.set_aspect('equal')
 
         plt.show()
+
+
 
 
     ##### UTILITARIES (COMPARE BETWEEN TWO GRAPHS) #######
