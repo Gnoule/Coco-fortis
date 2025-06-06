@@ -49,13 +49,12 @@ class Node:
     
     
     # Start of functions that will take care of rotations
+    @staticmethod
     def Rotate(origin, point, angle, decimals=5):
         def clean(value):
             value = round(value, decimals)
-            # Avoid -0.0: if very close to zero → 0
             if abs(value) < 1e-10:
                 return 0
-            # If integer value: returns int
             if value == int(value):
                 return int(value)
             return value
@@ -65,21 +64,23 @@ class Node:
         qx = ox + math.cos(angle) * (px - ox) - math.sin(angle) * (py - oy)
         qy = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)
         return clean(qx), clean(qy)
+
     
     def GetNormalizedRotations(self):
 
         def normalize(pixels):
             min_x = min(p[0] for p in pixels)
             min_y = min(p[1] for p in pixels)
-            return sorted([(x - min_x, y - min_y) for x, y in pixels])
+            return sorted([(int(round(x - min_x)), int(round(y - min_y))) for x, y in pixels])
 
-        center_x = sum(x for x, _ in self.pixel_positions) / self.size
-        center_y = sum(y for _, y in self.pixel_positions) / self.size
-        center = (center_x, center_y)
+        # translate positions to origin before rotating
+        translated = [(x - self.pixel_positions[0][0], y - self.pixel_positions[0][1]) for x, y in self.pixel_positions]
 
         rotations = []
         for i in range(4):
             angle = i * (math.pi / 2)
-            rotated = [Node.Rotate(center, p, angle) for p in self.pixel_positions]
+            rotated = [Node.Rotate((0, 0), p, angle) for p in translated]
             rotations.append(normalize(rotated))
+
         return rotations
+
