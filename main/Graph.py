@@ -15,7 +15,7 @@ class Graph:
         self.CreateNode(grid, 'NEIGHBOR')
         #then, we create the edges of the graph
         self.CreateEdges(grid)
-        print(self.HasDuplicateShapes())
+        # print(self.HasDuplicateShapes())
 
 
     # function to create the nodes of the graph (not the edges)
@@ -176,7 +176,6 @@ class Graph:
 
 
 
-
     # function to create the graphical graph
     def BuildGraphFromList(self, nodes):
         G = nx.Graph()
@@ -221,6 +220,12 @@ class Graph:
         fig, ax = plt.subplots(figsize=(cols, rows))
         im = ax.imshow(array, cmap=cmap, norm=norm)
 
+        # Ajouter une grille optionnelle
+        plt.grid(which='both', color='gray', linewidth=0.5)
+        plt.xticks(np.arange(len(self.grid[0])))
+        plt.yticks(np.arange(len(self.grid)))
+        plt.gca().invert_yaxis()  # pour garder (0,0) en haut à gauche
+        plt.gca().set_aspect('equal')
         # Ticks exactement sur les bords des cellules
         ax.set_xticks(np.arange(cols))
         ax.set_yticks(np.arange(rows))
@@ -247,6 +252,31 @@ class Graph:
     ##### UTILITARIES (COMPARE BETWEEN TWO GRAPHS) #######
 
     @staticmethod
+    def CompareNodesBetweenGraphs(graph1, graph2):
+        results = []
+
+        for node1 in graph1.nodes:
+            base_rot1 = node1.GetNormalizedRotations()[0]  # forme de base
+            match_list = []
+
+            for node2 in graph2.nodes:
+                node2_rotations = node2.GetNormalizedRotations()
+
+                for j, rot2 in enumerate(node2_rotations):
+                    if rot2 == base_rot1:
+                        rotation_angle = j * 90  # Combien node2 doit tourner pour devenir node1
+                        match_list.append((node2, rotation_angle))
+                        break  # stop at first match for this node2
+
+            results.append({
+                "node_input": node1,
+                "matches": match_list,
+                "match_count": len(match_list)
+            })
+
+        return results
+
+    @staticmethod
     def CompareTwoNodesPosition(grid_input, grid_output, node_input, node_output):
         pass
 
@@ -271,50 +301,49 @@ class Graph:
         pass
 
 
-
-    
-    def HasDuplicateShapes(self):
-        shape_groups = defaultdict(list)  # Maps normalized shape → list of nodes with that shape
-
-        for node in self.nodes:
-            # Get all normalized rotations of this node
-            rotated_shapes = node.GetNormalizedRotations()
-
-            matched = False
-            # Compare against all known shape keys
-            for key_shape in shape_groups.keys():
-                if any(rot == list(key_shape) for rot in rotated_shapes):
-                    shape_groups[key_shape].append(node)
-                    matched = True
-                    break
-
-            if not matched:
-                # First time we see this shape, store the first rotation as key
-                shape_groups[tuple(rotated_shapes[0])] = [node]
-
-        # Extract groups that contain repeated shapes
-        repeated_groups = [group for group in shape_groups.values() if len(group) > 1]
-
-        print(f"Number of repeated shape groups: {len(repeated_groups)}")
-        for group in repeated_groups:
-            print(f"Shape occurs {len(group)} times:")
-            for node in group:
-                print(f" - {node.GetPixelPositions()}")
-
-        return len(repeated_groups) > 0
-
-
 # grille = [
 #     [0, 0, 0, 0, 0, 1],
 #     [1, 1, 1, 0, 1, 1],
 #     [0, 1, 0, 0, 0, 1],
 #     [0, 0, 0, 0, 0, 0],
 #     [0, 1, 1, 1, 0, 0],
-#     [0, 0, 1, 0, 0, 0],
+#     [0, 0, 1, 0, 0, 1],
 # ]
-
+# startTime = datetime.now()
 # graph = Graph(grille)
 # for node in graph.nodes:
 #     print('yes = ', node.CheckUniColor()) 
-# #graph.ShowGrid()
-# graph.ShowGraph()
+# print(datetime.now() - startTime)
+# graph.ShowGrid()
+
+
+grid1 = [
+    [1, 0, 0, 0, 0],
+    [0, 0, 0, 2, 0],
+    [0, 0, 2, 2, 0],
+    [1, 0, 0, 2, 0],
+    [1, 1, 0, 0, 0],
+]
+
+grid2 = [
+    [0, 0, 0, 0, 0],
+    [2, 0, 0, 0, 1],
+    [2, 2, 0, 0, 0],
+    [2, 0, 0, 0, 1],
+    [0, 0, 0, 1, 1],
+]
+
+g1 = Graph(grid1)
+g2 = Graph(grid2)
+
+print("Résultat de comparaison entre les deux graphes:")
+results = Graph.CompareNodesBetweenGraphs(g1, g2)
+
+for result in results:
+    node1_pixels = sorted(result['node_input'].GetPixelPositions())
+    print(f"\n→ Node in Graph 1: {node1_pixels}")
+    print(f"Matches found: {result['match_count']}")
+    for matched_node, rotation in result["matches"]:
+        print(f"  Match with: {sorted(matched_node.GetPixelPositions())} — rotation: {rotation}°")
+
+
