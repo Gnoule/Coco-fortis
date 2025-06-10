@@ -8,6 +8,7 @@ def FindConstraintFromExample(training_input, training_output):
     graph.ShowGrid()
     graph.ShowGraph()
     
+    
     print(datetime.now() - startTime)
 
 def FilterConstraint():

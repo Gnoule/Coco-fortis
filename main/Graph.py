@@ -304,17 +304,17 @@ class Graph:
         return len(repeated_groups) > 0
 
 
-grille = [
-    [0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 0, 1, 1],
-    [0, 1, 0, 0, 0, 1],
-    [0, 0, 0, 0, 0, 0],
-    [0, 1, 1, 1, 0, 0],
-    [0, 0, 1, 0, 0, 0],
-]
+# grille = [
+#     [0, 0, 0, 0, 0, 1],
+#     [1, 1, 1, 0, 1, 1],
+#     [0, 1, 0, 0, 0, 1],
+#     [0, 0, 0, 0, 0, 0],
+#     [0, 1, 1, 1, 0, 0],
+#     [0, 0, 1, 0, 0, 0],
+# ]
 
-graph = Graph(grille)
-for node in graph.nodes:
-    print('yes = ', node.CheckUniColor()) 
-#graph.ShowGrid()
-graph.ShowGraph()
+# graph = Graph(grille)
+# for node in graph.nodes:
+#     print('yes = ', node.CheckUniColor()) 
+# #graph.ShowGrid()
+# graph.ShowGraph()
