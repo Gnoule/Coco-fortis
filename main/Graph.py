@@ -247,9 +247,28 @@ class Graph:
         plt.show()
 
 
+    ##### GETTER / SETTER ######
+
+    # TODO
+    def GetGridSize(self):
+        pass
+
+    # TODO
+    def GetNumberNodes(self):
+        pass
+
+    # TODO
+    def GetNodes(self):
+        pass
 
 
     ##### UTILITARIES (COMPARE BETWEEN TWO GRAPHS) #######
+
+
+    # TODO return same as CompareNodeBetweenGraphs if node is in the graph_output
+    @staticmethod
+    def CompareNodeBetweenGraphs(node, graph_output):
+        pass
 
     @staticmethod
     def CompareNodesBetweenGraphs(graph1, graph2):
@@ -271,34 +290,46 @@ class Graph:
             results.append({
                 "node_input": node1,
                 "matches": match_list,
-                "match_count": len(match_list)
+                "match_count": len(match_list),
+                "nodes_matches": None       # TODO associer les matchs found aux nodes found (quand on trouve une sequence, il faut savoir c'est quel node)
             })
 
         return results
 
+
+    # TODO check if sequence in other graph 
     @staticmethod
-    def CompareTwoNodesPosition(grid_input, grid_output, node_input, node_output):
+    def CompareNodeSequenceBetweenGraphs(node, output_graph):
         pass
 
+    # TODO check if the two nodes are at same place
     @staticmethod
-    def CompareTwoNodesColor(grid_input, grid_output, node_input, node_output):
+    def CompareTwoNodesPosition(input_graph, output_graph, node_input, node_output):
         pass
 
+    # TODO check if two nodes have same color
     @staticmethod
-    def CompareTwoNodesSize(grid_input, grid_output, node_input, node_output):
+    def CompareTwoNodesColor(input_graph, output_graph, node_input, node_output):
+        pass
+    
+    # TODO check number of pixels of two nodes
+    @staticmethod
+    def CompareTwoNodesSize(input_graph, output_graph, node_input, node_output):
         pass
 
+    # TODO check if node extend to another node
     @staticmethod
-    def CompareGridSize(grid_input, grid_output):
+    def CompareNodeExtended(input_graph, output_graph, node_input):
         pass
 
-    @staticmethod
-    def CheckNodeOnOutput(grid_input, grid_output, node_input):
-        pass
+    # @staticmethod
+    # def CompareGridSize(grid_input, grid_output):
+    #     pass
 
-    @staticmethod
-    def CheckNodeSizeOnOutput(grid_input, grid_output):
-        pass
+    # @staticmethod
+    # def CheckNodeOnOutput(grid_input, grid_output, node_input):
+    #     pass
+
 
 
 # grille = [

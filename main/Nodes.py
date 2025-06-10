@@ -47,6 +47,10 @@ class Node:
         else:
             return True
     
+    # TODO return color if contructed on color graph
+    def GetColor(self):
+        return self.color
+    
     
     # Start of functions that will take care of rotations
     @staticmethod
