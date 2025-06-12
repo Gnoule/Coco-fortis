@@ -11,15 +11,19 @@ class Node:
         else:
             self.color = None
         self.associated_nodes = []
+        self.directly_connected_nodes = []
         self.pixel_positions = pixel_position
         self.pixel_colors = pixel_colors
 
 
     # connection_type = HORIZONTAL OR VERTICAL
-    def AddAssociatedNode(self, new_node, connection_type):
+    # diff = difference between this node and other node
+    def AddAssociatedNode(self, new_node, connection_type, diff):
         if (new_node in self.associated_nodes):
             return
         self.associated_nodes.append((new_node, connection_type))
+        if diff <= 1:
+            self.directly_connected_nodes(new_node)
 
     def GetAssociatedNode(self):
         return self.associated_nodes
@@ -46,6 +50,26 @@ class Node:
 
         else:
             return True
+    
+    # TODO return color if contructed on color graph
+    def GetColor(self):
+        if self.color == None:
+            return self.pixel_colors[self.pixel_positions[0]]
+        return self.color
+    
+    # return size
+    def GetSize(self):
+        return self.size
+
+    # TODO return if node has a hole
+    def IsEmpty(self):
+        return False
+    
+
+    def IsConnected(self):
+        if len(self.directly_connected_nodes) > 0:
+            return True
+        return False 
     
     
     # Start of functions that will take care of rotations
