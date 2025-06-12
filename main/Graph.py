@@ -5,6 +5,7 @@ import math
 import numpy as np
 from matplotlib import colors
 from collections import defaultdict
+from matplotlib import colors
 
 class Graph:
 
@@ -247,8 +248,6 @@ class Graph:
         plt.show()
 
 
-
-
     ##### UTILITARIES (COMPARE BETWEEN TWO GRAPHS) #######
 
     @staticmethod
@@ -317,33 +316,68 @@ class Graph:
 # graph.ShowGrid()
 
 
-grid1 = [
-    [1, 0, 0, 0, 0],
-    [0, 0, 0, 2, 0],
-    [0, 0, 2, 2, 0],
-    [1, 0, 0, 2, 0],
-    [1, 1, 0, 0, 0],
-]
+# grid1 = [
+#     [9, 6, 5, 6, 9, 5, 3, 3, 5, 9, 6, 5, 6, 9, 5, 3, 3, 5, 9, 6, 5],
+#     [6, 3, 2, 3, 6, 2, 9, 9, 2, 0, 0, 0, 0, 0, 2, 9, 9, 2, 6, 3, 2],
+#     [5, 2, 1, 2, 5, 1, 8, 8, 1, 0, 0, 0, 0, 0, 1, 8, 8, 1, 5, 2, 1],
+#     [6, 3, 2, 3, 6, 2, 9, 9, 2, 0, 0, 0, 0, 0, 2, 9, 9, 2, 6, 3, 2],
+#     [9, 6, 5, 6, 9, 5, 3, 3, 5, 9, 6, 5, 6, 9, 5, 3, 3, 5, 9, 6, 5],
+#     [5, 2, 1, 2, 5, 1, 8, 8, 1, 5, 2, 1, 2, 5, 1, 8, 8, 1, 5, 2, 1],
+#     [3, 9, 8, 9, 3, 8, 6, 6, 8, 3, 9, 8, 9, 3, 8, 6, 6, 8, 3, 9, 8],
+#     [3, 9, 8, 9, 3, 8, 6, 6, 8, 3, 9, 8, 9, 3, 8, 6, 6, 8, 3, 9, 8],
+#     [5, 2, 1, 2, 0, 0, 0, 0, 1, 5, 2, 1, 2, 5, 1, 8, 8, 1, 5, 2, 1],
+#     [9, 6, 5, 6, 0, 0, 0, 0, 5, 9, 6, 5, 6, 9, 5, 3, 3, 5, 9, 6, 5],
+#     [6, 3, 2, 3, 0, 0, 0, 0, 2, 6, 3, 2, 3, 6, 2, 9, 9, 2, 6, 3, 2],
+#     [5, 2, 1, 2, 5, 1, 8, 8, 1, 5, 2, 1, 2, 5, 1, 8, 8, 1, 5, 2, 1],
+#     [6, 3, 2, 3, 6, 2, 9, 9, 2, 6, 3, 2, 3, 6, 0, 0, 9, 2, 6, 3, 2],
+#     [9, 6, 5, 6, 9, 5, 3, 3, 5, 9, 6, 5, 6, 9, 0, 0, 3, 5, 9, 6, 5],
+#     [5, 2, 1, 2, 5, 1, 8, 8, 1, 5, 2, 1, 2, 5, 0, 0, 8, 1, 5, 2, 1],
+#     [0, 0, 8, 9, 0, 0, 0, 6, 8, 3, 9, 8, 9, 3, 0, 0, 6, 8, 3, 9, 8],
+#     [0, 0, 8, 9, 0, 0, 0, 6, 8, 3, 9, 8, 9, 3, 8, 6, 6, 8, 3, 9, 8],
+#     [5, 2, 1, 2, 0, 0, 0, 8, 1, 5, 2, 1, 2, 5, 1, 8, 8, 1, 5, 2, 1],
+#     [9, 6, 5, 6, 0, 0, 0, 3, 5, 9, 6, 5, 6, 9, 5, 3, 3, 5, 9, 6, 5],
+#     [6, 3, 2, 3, 0, 0, 0, 9, 2, 6, 3, 2, 3, 6, 2, 9, 9, 2, 6, 3, 2],
+#     [5, 2, 1, 2, 5, 1, 8, 8, 1, 5, 2, 1, 2, 5, 1, 8, 8, 1, 5, 2, 1],
+# ]
 
-grid2 = [
-    [0, 0, 0, 0, 0],
-    [2, 0, 0, 0, 1],
-    [2, 2, 0, 0, 0],
-    [2, 0, 0, 0, 1],
-    [0, 0, 0, 1, 1],
-]
+# graph = Graph(grid1)
+# groups = graph.FindNodesWithSameInternalPattern(2)
 
-g1 = Graph(grid1)
-g2 = Graph(grid2)
+# for i, group in enumerate(groups):
+#     print(f"\nPattern {i+1} trouvé dans {len(group)} nœuds :")
+#     for node in group:
+#         print(f" → Pixels: {sorted(node.GetPixelPositions())}")
+#         print(f" → Sous-pattern (valeurs = 2) : {sorted(node.ExtractSubPatternPositions(2))}")
 
-print("Résultat de comparaison entre les deux graphes:")
-results = Graph.CompareNodesBetweenGraphs(g1, g2)
+# grid1 = [
+#     [1, 0, 0, 0, 0],
+#     [0, 0, 0, 2, 0],
+#     [0, 0, 2, 2, 0],
+#     [1, 0, 0, 2, 0],
+#     [1, 1, 0, 0, 0],
+# ]
 
-for result in results:
-    node1_pixels = sorted(result['node_input'].GetPixelPositions())
-    print(f"\n→ Node in Graph 1: {node1_pixels}")
-    print(f"Matches found: {result['match_count']}")
-    for matched_node, rotation in result["matches"]:
-        print(f"  Match with: {sorted(matched_node.GetPixelPositions())} — rotation: {rotation}°")
+# grid2 = [
+#     [0, 0, 0, 0, 0],
+#     [2, 0, 0, 0, 1],
+#     [2, 2, 0, 0, 0],
+#     [2, 0, 0, 0, 1],
+#     [0, 0, 0, 1, 1],
+# ]
+
+# g1 = Graph(grid1)
+# g2 = Graph(grid2)
+
+# print("Résultat de comparaison entre les deux graphes:")
+# results = Graph.CompareNodesBetweenGraphs(g1, g2)
+
+# for result in results:
+#     node1_pixels = sorted(result['node_input'].GetPixelPositions())
+#     print(f"\n→ Node in Graph 1: {node1_pixels}")
+#     print(f"Matches found: {result['match_count']}")
+#     for matched_node, rotation in result["matches"]:
+#         print(f"  Match with: {sorted(matched_node.GetPixelPositions())} — rotation: {rotation}°")
+
+
 
 
