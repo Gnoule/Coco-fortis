@@ -53,6 +53,17 @@ output_example2 = [
     [0, 0, 0, 0, 0, 0, 0],
 ]
 
+
+evaluation_example = [
+    [0, 4, 0, 0, 0, 4, 0],
+    [4, 4, 4, 0, 4, 4, 4],
+    [0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 4, 0, 0, 1],
+    [0, 0, 4, 4, 4, 0, 1],
+    [0, 0, 0, 0, 0, 0, 0],
+]
+
 constraints_brut = []
 startTime = datetime.now()
 constraints_brut.append(FindConstraintFromExample(input_example1, output_example1))
