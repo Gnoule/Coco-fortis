@@ -139,8 +139,9 @@ class Graph:
                     # if there is a node 
                     if (grid[pos_tested[1]][pos_tested[0]] != 0 and pos_tested not in pixels):
                         if pos_tested in pixels_associated:
+                            diff = x - pos[0]
                             # we associate current node to the node found
-                            node.AddAssociatedNode(pixels_associated[pos_tested], "HORIZONTAL")
+                            node.AddAssociatedNode(pixels_associated[pos_tested], "HORIZONTAL", diff)
                             break 
                 
                 # LEFT DIRECTION
@@ -148,7 +149,8 @@ class Graph:
                     pos_tested = (x, pos[1])
                     if (grid[pos_tested[1]][pos_tested[0]] != 0 and pos_tested not in pixels):
                         if pos_tested in pixels_associated:
-                            node.AddAssociatedNode(pixels_associated[pos_tested], "HORIZONTAL")
+                            diff = pos[0] - x
+                            node.AddAssociatedNode(pixels_associated[pos_tested], "HORIZONTAL", diff)
                             break
 
                 # DOWN DIRECTION        
@@ -156,7 +158,8 @@ class Graph:
                     pos_tested = (pos[0], y)
                     if (grid[pos_tested[1]][pos_tested[0]] != 0 and pos_tested not in pixels):
                         if pos_tested in pixels_associated:
-                            node.AddAssociatedNode(pixels_associated[pos_tested], "VERTICAL")
+                            diff = y - pos[1]
+                            node.AddAssociatedNode(pixels_associated[pos_tested], "VERTICAL", diff)
                             break
 
                 # UP DIRECTION        
@@ -164,7 +167,8 @@ class Graph:
                     pos_tested = (pos[0], y)
                     if (grid[pos_tested[1]][pos_tested[0]] != 0 and pos_tested not in pixels):
                         if pos_tested in pixels_associated:
-                            node.AddAssociatedNode(pixels_associated[pos_tested], "VERTICAL")
+                            diff = pos[1] - y
+                            node.AddAssociatedNode(pixels_associated[pos_tested], "VERTICAL", diff)
                             break
         print(self.nodes)
 
@@ -249,26 +253,65 @@ class Graph:
 
     ##### GETTER / SETTER ######
 
-    # TODO
+    # get grid size
+    # TODO: return x len and y len
     def GetGridSize(self):
-        pass
+        return len(self.grid)
 
     # TODO
     def GetNumberNodes(self):
-        pass
+        return len(self.nodes)
 
-    # TODO
+    # get nodes
     def GetNodes(self):
-        pass
+        return self.nodes
 
 
     ##### UTILITARIES (COMPARE BETWEEN TWO GRAPHS) #######
 
 
-    # TODO return same as CompareNodeBetweenGraphs if node is in the graph_output
+    # return same as CompareNodeBetweenGraphs if node is in the graph_output
     @staticmethod
-    def CompareNodeBetweenGraphs(node, graph_output):
-        pass
+    def CompareNodeBetweenGraphs(node, graph):
+        base_rot1 = node.GetNormalizedRotations()[0]  # forme de base
+        match_list = []
+
+        for node2 in graph.nodes:
+            node2_rotations = node2.GetNormalizedRotations()
+
+            for j, rot2 in enumerate(node2_rotations):
+                if rot2 == base_rot1:
+                    rotation_angle = j * 90  # Combien node2 doit tourner pour devenir node1
+                    match_list.append((node2, rotation_angle))
+                    break  # stop at first match for this node2
+
+        return {
+            "matches": match_list,
+            "match_count": len(match_list),
+        }
+    
+
+    @staticmethod
+    def IsNodeRepeatingLargest(node, graph):
+        match_count = Graph.CompareNodeBetweenGraphs(node, graph)['match_count']
+        for node1 in graph.nodes:
+            if node1 == node:
+                continue
+            current_count = Graph.CompareNodeBetweenGraphs(node1, graph)['match_count']
+            if match_count < current_count:
+                return False
+        return True
+    
+    @staticmethod
+    def IsNodeRepeatingLowest(node, graph):
+        match_count = Graph.CompareNodeBetweenGraphs(node, graph)['match_count']
+        for node1 in graph.nodes:
+            if node1 == node:
+                continue
+            current_count = Graph.CompareNodeBetweenGraphs(node1, graph)['match_count']
+            if match_count > current_count:
+                return False
+        return True
 
     @staticmethod
     def CompareNodesBetweenGraphs(graph1, graph2):
@@ -290,8 +333,7 @@ class Graph:
             results.append({
                 "node_input": node1,
                 "matches": match_list,
-                "match_count": len(match_list),
-                "nodes_matches": None       # TODO associer les matchs found aux nodes found (quand on trouve une sequence, il faut savoir c'est quel node)
+                "match_count": len(match_list)
             })
 
         return results
@@ -302,10 +344,15 @@ class Graph:
     def CompareNodeSequenceBetweenGraphs(node, output_graph):
         pass
 
-    # TODO check if the two nodes are at same place
+    # check if the two nodes are at same place (note: node input and output have the same pixel pos structure)
+    # TODO: DO NOT APPLY TO ROTATED structures
+    #returns: [x, y] => offset of the nodes ex: [2, 3] => output node is 2 on X axis and 3 on y axis compared to original
     @staticmethod
     def CompareTwoNodesPosition(input_graph, output_graph, node_input, node_output):
-        pass
+        first_pixel_input = node_input.GetPixelPositions()[0]
+        first_pixel_output = node_output.GetPixelPositions()[0]
+
+        return (first_pixel_output[0] - first_pixel_input[0], first_pixel_output[1], first_pixel_input[1])
 
     # TODO check if two nodes have same color
     @staticmethod
