@@ -107,4 +107,9 @@ class Node:
             rotations.append(normalize(rotated))
 
         return rotations
+    
+    def ExtractSubPatternPositions(self, target_value):
+        return [pos for pos in self.pixel_colors if self.pixel_colors[pos] == target_value]
+    
+
 
