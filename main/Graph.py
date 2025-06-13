@@ -13,7 +13,7 @@ class Graph:
         self.nodes = []
         self.grid = grid
         # first, we create the nodes (by giving the type of graph construction)
-        self.CreateNode(grid, 'NEIGHBOR')
+        self.CreateNode(grid, 'COLOR')
         #then, we create the edges of the graph
         self.CreateEdges(grid)
         # print(self.HasDuplicateShapes())
@@ -73,7 +73,7 @@ class Graph:
                     pixel_found.append(pos_tested)
                     pos_already_visited.append(pos_tested)
                     # recursive call to check position
-                    self.CreateNodeWithColor(grid, pos_tested, pixel_found, pos_already_visited)
+                    self.CreateNodeWithColor(grid, pos_tested, pixel_found, pixel_value, pos_already_visited)
 
 
     # current_pos[0] -> x
