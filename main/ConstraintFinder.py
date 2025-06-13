@@ -13,6 +13,7 @@ class ConstraintType(Enum):
     NODE_Y_FIXED = 7    # actual node needs to NOT move in y direction
     DEACTIVE = 8    #actual node needs to be deactivated
     EXTEND_TO_NODE = 9      # actual node needs to be extended to other node
+    CENTER_NODE = 10    # TODO center node to the grid
 
 class ConstraintIfType(Enum):
     NONE = 0    #no condition (apply to all nodes / apply to graph)

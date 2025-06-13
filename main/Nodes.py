@@ -23,7 +23,7 @@ class Node:
             return
         self.associated_nodes.append((new_node, connection_type))
         if diff <= 1:
-            self.directly_connected_nodes(new_node)
+            self.directly_connected_nodes.append(new_node)
 
     def GetAssociatedNode(self):
         return self.associated_nodes

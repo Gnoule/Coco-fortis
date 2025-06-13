@@ -12,7 +12,7 @@ class Graph:
         self.nodes = []
         self.grid = grid
         # first, we create the nodes (by giving the type of graph construction)
-        self.CreateNode(grid, 'NEIGHBOR')
+        self.CreateNode(grid, 'COLOR')
         #then, we create the edges of the graph
         self.CreateEdges(grid)
         # print(self.HasDuplicateShapes())
@@ -72,7 +72,7 @@ class Graph:
                     pixel_found.append(pos_tested)
                     pos_already_visited.append(pos_tested)
                     # recursive call to check position
-                    self.CreateNodeWithColor(grid, pos_tested, pixel_found, pos_already_visited)
+                    self.CreateNodeWithColor(grid, pos_tested, pixel_found, pixel_value, pos_already_visited)
 
 
     # current_pos[0] -> x
@@ -396,8 +396,8 @@ class Graph:
 
 
 grid1 = [
-    [1, 0, 0, 0, 0],
-    [0, 0, 0, 2, 0],
+    [1, 0, 0, 1, 0],
+    [0, 0, 0, 1, 0],
     [0, 0, 2, 2, 0],
     [1, 0, 0, 2, 0],
     [1, 1, 0, 0, 0],
@@ -412,16 +412,17 @@ grid2 = [
 ]
 
 g1 = Graph(grid1)
-g2 = Graph(grid2)
+g1.ShowGraph()
+# g2 = Graph(grid2)
 
-print("Résultat de comparaison entre les deux graphes:")
-results = Graph.CompareNodesBetweenGraphs(g1, g2)
+# print("Résultat de comparaison entre les deux graphes:")
+# results = Graph.CompareNodesBetweenGraphs(g1, g2)
 
-for result in results:
-    node1_pixels = sorted(result['node_input'].GetPixelPositions())
-    print(f"\n→ Node in Graph 1: {node1_pixels}")
-    print(f"Matches found: {result['match_count']}")
-    for matched_node, rotation in result["matches"]:
-        print(f"  Match with: {sorted(matched_node.GetPixelPositions())} — rotation: {rotation}°")
+# for result in results:
+#     node1_pixels = sorted(result['node_input'].GetPixelPositions())
+#     print(f"\n→ Node in Graph 1: {node1_pixels}")
+#     print(f"Matches found: {result['match_count']}")
+#     for matched_node, rotation in result["matches"]:
+#         print(f"  Match with: {sorted(matched_node.GetPixelPositions())} — rotation: {rotation}°")
 
 
