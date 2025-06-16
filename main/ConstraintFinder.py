@@ -23,7 +23,7 @@ class ConstraintIfType(Enum):
     IF_FORM_NEAR_OTHER_FORM = 4     # if actual node is connected to another nodez
     IF_FORM_REPEAT = 5      # if actual node is found repeating (multiple sequences detected)
     IF_NODE_UNKNOW = 6      # if actual node is not found at all 💀
-    IF_FORM_REPEAT_LARGEST_OR_LOWEST = 7      # if actual node has repeating patern the largest
+    IF_FORM_REPEAT_LARGEST_OR_LOWEST = 7      # if actual node has repeating patern the largest LARGE OR LOW
 
 
 
