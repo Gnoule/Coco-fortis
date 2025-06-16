@@ -2,6 +2,8 @@ from Graph import Graph
 from datetime import datetime
 from enum import Enum
 
+
+
 class ConstraintType(Enum):
     GRID_SIZE = 0   # size of the grid of output
     FORM_INPUT_EQUAL_FORM_OUTPUT = 1    # actual node needs to be in the output form
@@ -234,12 +236,12 @@ def FilterConstraint(examples_constraints):
                             # if constraints if values of both are same (not contradicting) so we add it to the official values (+check before if already in list so no double values)
                             if (set(current_constraint['constraints_if'][current_constraint_if]) == set(current_constraint_tested['constraints_if'][current_constraint_if]) 
                             and current_constraint_if not in constraint_to_add[name_constraint]['constraints_if']):
-                                constraint_to_add[name_constraint]['constraints_if'][current_constraint_if] = current_constraint['constraints_if'][current_constraint_if]
+                                constraint_to_add[name_constraint]['constraints_if'][current_constraint_if] = current_constraint['constraints_if'][current_constraint_if][0]    # TODO [0] not sure
                             # else, constraints are contradicting, if already in the liste, we delete it 
                             else:
                                 if current_constraint_if in constraint_to_add[name_constraint]['constraints_if']:
                                     del constraint_to_add[name_constraint]['constraints_if'][current_constraint_if]
                         else:
-                            constraint_to_add[name_constraint]['constraints_if'][current_constraint_if] = current_constraint_tested['constraints_if'][current_constraint_if]
+                            constraint_to_add[name_constraint]['constraints_if'][current_constraint_if] = current_constraint_tested['constraints_if'][current_constraint_if][0]  # TODO [0] not sure
 
     return constraint_to_add                 

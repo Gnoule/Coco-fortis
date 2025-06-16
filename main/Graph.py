@@ -18,6 +18,7 @@ class Graph:
         #then, we create the edges of the graph
         self.CreateEdges(grid)
         # print(self.HasDuplicateShapes())
+        self.active = True
 
 
     # function to create the nodes of the graph (not the edges)

@@ -25,7 +25,7 @@ def CreateCondition(all_constraint_if, node, graph):
                     if Graph.IsNodeRepeatingLowest(node, graph) == False:
                         return False
             case ConstraintIfType.IF_SIZE:
-                if node.BiggerSize(all_constraint_if[constraint_if][0]) == False:
+                if node.BiggerSize(all_constraint_if[constraint_if]) == False:
                     return False
     return True
 
@@ -118,9 +118,9 @@ def Resolver(final_constraint, input_grid):
         for constraint in final_constraint:
             match constraint:
                 case ConstraintType.FORM_INPUT_EQUAL_FORM_OUTPUT:
-                    if CreateCondition(final_constraint[constraint]['constraints_if'], nodes[i], graph_input):
+                    if not CreateCondition(final_constraint[constraint]['constraints_if'], nodes[i], graph_input):
                         print("nodes[i] = ", i)
-                    #     satisfy(nodex_active[i] == 1)
+                        satisfy(nodex_active[i] == 0)
                     continue
                 case ConstraintType.FORM_OUTPUT_COLOR:
                     continue
@@ -130,9 +130,19 @@ def Resolver(final_constraint, input_grid):
 
     
     if solve(solver="ace") is SAT:
+
         print("nodex_offset_x = ", values(nodex_offset_x))
         print("nodex_offset_y = ", values(nodex_offset_y))
         print("nodex_color = ", values(nodex_color))
         print("nodex_active = ", values(nodex_active))
+
+        return {
+            "nodex_offset_x": values(nodex_offset_x),
+            "nodex_offset_y": values(nodex_offset_y),
+            "nodex_color": values(nodex_color),
+            "nodex_active":values(nodex_active)
+        }
+    
     else:
         print("Pas de solution (UNSAT).")
+        return None
