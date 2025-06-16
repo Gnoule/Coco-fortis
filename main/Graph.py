@@ -6,6 +6,7 @@ import numpy as np
 from matplotlib import colors
 from collections import defaultdict
 from matplotlib import colors
+import json
 
 class Graph:
 
@@ -39,10 +40,11 @@ class Graph:
                 if type == "NEIGHBOR":
                     pixel_color_found[(x,y)] = pixel_value
                     self.CreateNodeWithNeighbors(grid, [x,y], pixel_found, pixel_color_found, pos_already_visited)
+                    node = Node(pixel_found, pixel_color_found) 
                 elif type == "COLOR":
                     self.CreateNodeWithColor(grid, [x,y], pixel_found, pixel_value, pos_already_visited)
+                    node = Node(pixel_found, color=pixel_value) 
                 # end of the search, we add the pixels to the node created
-                node = Node(pixel_found, pixel_color_found) 
                 self.nodes.append(node)
         print(pos_already_visited)
 
@@ -213,43 +215,26 @@ class Graph:
         plt.axis('equal')  # respect des proportions
         plt.show()
 
+    def SortNodesByColorAndSize(self):
+        grouped_nodes = defaultdict(list)
 
-    def ShowGrid(self):
-        array = np.array(self.grid)
-        rows, cols = array.shape
+        for node in self.nodes:
+            color = node.GetColor()
+            size = node.GetSize()
+            key = (color, size)
+            grouped_nodes[key].append(node)
 
-        cmap = colors.ListedColormap(['black', 'red', 'green', 'blue', 'orange', 'purple'])
-        bounds = [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5]
-        norm = colors.BoundaryNorm(bounds, cmap.N)
+        # Keep only groups with more than one node
+        grouped_nodes = {k: v for k, v in grouped_nodes.items() if len(v) > 1}
 
-        fig, ax = plt.subplots(figsize=(cols, rows))
-        im = ax.imshow(array, cmap=cmap, norm=norm)
+        # Sort by color (as string) and then by size
+        sorted_keys = sorted(grouped_nodes.keys(), key=lambda k: (str(k[0]), k[1]))
 
-        # Ajouter une grille optionnelle
-        plt.grid(which='both', color='gray', linewidth=0.5)
-        plt.xticks(np.arange(len(self.grid[0])))
-        plt.yticks(np.arange(len(self.grid)))
-        plt.gca().invert_yaxis()  # pour garder (0,0) en haut à gauche
-        plt.gca().set_aspect('equal')
-        # Ticks exactement sur les bords des cellules
-        ax.set_xticks(np.arange(cols))
-        ax.set_yticks(np.arange(rows))
+        sorted_nodes = []
+        for key in sorted_keys:
+            sorted_nodes.extend(grouped_nodes[key])
 
-        # Affichage des labels
-        ax.set_xticklabels(np.arange(cols))
-        ax.set_yticklabels(np.arange(rows))
-
-        # Grille aux bonnes positions
-        ax.set_xticks(np.arange(-0.5, cols, 1), minor=True)
-        ax.set_yticks(np.arange(-0.5, rows, 1), minor=True)
-        ax.grid(which='minor', color='gray', linestyle='-', linewidth=0.5)
-
-        # Réglages visuels
-        ax.tick_params(top=False, bottom=True, labeltop=False, labelbottom=True)
-        ax.invert_yaxis()
-        ax.set_aspect('equal')
-
-        plt.show()
+        return sorted_nodes
 
 
     ##### GETTER / SETTER ######
@@ -290,6 +275,141 @@ class Graph:
             "matches": match_list,
             "match_count": len(match_list),
         }
+
+    
+    @staticmethod
+    def ExtractFirstRepeatedGroup(nodes):
+        if not nodes:
+            return []
+
+        first_group = []
+        first_key = (nodes[0].GetColor(), nodes[0].GetSize())
+
+        for node in nodes:
+            key = (node.GetColor(), node.GetSize())
+            if key == first_key:
+                first_group.append(node)
+            else:
+                break
+
+        return first_group
+
+    
+    @staticmethod
+    def FindPattern(start_node, graph_instance):
+        # Access all nodes via the instance method
+        sorted_nodes = graph_instance.SortNodesByColorAndSize()
+        work_section = Graph.ExtractFirstRepeatedGroup(sorted_nodes)
+
+        pos_to_node = {}
+        for node in graph_instance.nodes:
+            for pos in node.GetPixelPositions():
+                pos_to_node[pos] = node
+
+        directions = {
+            "UP": (0, -1),
+            "DOWN": (0, 1),
+            "LEFT": (-1, 0),
+            "RIGHT": (1, 0),
+        }
+
+        taboo = set()
+        result = []
+
+        # Step 1: Pair initialization
+        for i in range(len(work_section)):
+            n1 = work_section[i]
+            pos1 = n1.GetPixelPositions()[0]
+            for j in range(i + 1, len(work_section)):
+                n2 = work_section[j]
+                pos2 = n2.GetPixelPositions()[0]
+                if n1.GetColor() == n2.GetColor() and n1.GetSize() == n2.GetSize():
+                    for _, (dx, dy) in directions.items():
+                        neighbor_pos1 = (pos1[0] + dx, pos1[1] + dy)
+                        neighbor_pos2 = (pos2[0] + dx, pos2[1] + dy)
+                        if (neighbor_pos1, neighbor_pos2) in taboo or (neighbor_pos2, neighbor_pos1) in taboo:
+                            continue
+                        node_voisin_1 = pos_to_node.get(neighbor_pos1)
+                        node_voisin_2 = pos_to_node.get(neighbor_pos2)
+                        if node_voisin_1 and node_voisin_2:
+                            if node_voisin_1.GetColor() == node_voisin_2.GetColor() and node_voisin_1.GetSize() == node_voisin_2.GetSize():
+                                result.append([[n1, node_voisin_1], [n2, node_voisin_2]])
+                            else:
+                                taboo.add((neighbor_pos1, neighbor_pos2))
+                        else:
+                            taboo.add((neighbor_pos1, neighbor_pos2))
+
+        # Step 2: Pattern growth to true stability
+        while True:
+            changed = False
+            new_result = []
+
+            for group in result:
+                chain1, chain2 = group
+                last1 = chain1[-1]
+                last2 = chain2[-1]
+                pos1 = last1.GetPixelPositions()[0]
+                pos2 = last2.GetPixelPositions()[0]
+
+                extended = False
+                for _, (dx, dy) in directions.items():
+                    n_pos1 = (pos1[0] + dx, pos1[1] + dy)
+                    n_pos2 = (pos2[0] + dx, pos2[1] + dy)
+
+                    if (n_pos1, n_pos2) in taboo or (n_pos2, n_pos1) in taboo:
+                        continue
+
+                    n1 = pos_to_node.get(n_pos1)
+                    n2 = pos_to_node.get(n_pos2)
+
+                    if n1 and n2:
+                        if (n1.GetColor() == n2.GetColor() and
+                            n1.GetSize() == n2.GetSize() and
+                            n1 not in chain1 and n2 not in chain2):
+                            new_result.append([chain1 + [n1], chain2 + [n2]])
+                            changed = True
+                            extended = True
+                            break
+                        else:
+                            taboo.add((n_pos1, n_pos2))
+                    else:
+                        taboo.add((n_pos1, n_pos2))
+
+                if not extended:
+                    new_result.append(group)
+
+            if not changed:
+                break
+
+            result = new_result
+
+        # Export JSON with pattern length >= 3
+        motifs_json = []
+        for group in result:
+            motif = []
+            valid = True
+            for chain in group:
+                if len(chain) < 3:
+                    valid = False
+                    break
+                chain_positions = [node.GetPixelPositions() for node in chain]
+                motif.append(chain_positions)
+            if valid:
+                motifs_json.append(motif)
+
+        json_result = {
+            "total_motifs": len(motifs_json),
+            "taboo_combinations": len(taboo),
+            "patterns": motifs_json
+        }
+
+        with open("patterns.json", "w") as f:
+            json.dump(json_result, f, indent=2)
+        print("Pattern result saved to 'patterns.json'.")
+
+        return json_result
+
+
     
 
     @staticmethod

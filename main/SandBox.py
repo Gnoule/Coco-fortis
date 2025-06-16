@@ -1,4 +1,5 @@
 from Graph import Graph
+from datetime import datetime
 
 # === GRILLE ===
 grid1 = [
@@ -27,5 +28,21 @@ grid1 = [
 
 grid2 = [[0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0], [0, 0, 2, 0, 0, 8, 0, 0, 8, 0, 0, 8, 0, 0, 8, 0, 0], [0, 2, 2, 2, 0, 8, 0, 8, 8, 8, 0, 8, 0, 2, 2, 2, 0], [0, 0, 2, 0, 0, 8, 0, 0, 8, 0, 0, 8, 0, 0, 8, 0, 0], [0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0], [8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8], [0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0], [0, 0, 8, 0, 0, 8, 0, 0, 2, 0, 0, 8, 0, 0, 8, 0, 0], [0, 8, 8, 8, 0, 8, 0, 2, 8, 2, 0, 8, 0, 8, 8, 8, 0], [0, 0, 8, 0, 0, 8, 0, 0, 2, 0, 0, 8, 0, 0, 8, 0, 0], [0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0], [8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8], [0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0], [0, 0, 2, 0, 0, 8, 0, 0, 8, 0, 0, 8, 0, 0, 8, 0, 0], [0, 2, 2, 2, 0, 8, 0, 8, 8, 8, 0, 8, 0, 8, 8, 8, 0], [0, 0, 2, 0, 0, 8, 0, 0, 8, 0, 0, 8, 0, 0, 8, 0, 0], [0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0]]
 
+
 graph = Graph(grid1)
-graph.ShowGraph()
+
+
+startTime = datetime.now()
+
+first_node = graph.GetNodes()[0]
+
+pattern_result = Graph.FindPattern(first_node, graph)
+
+print(datetime.now() - startTime)
+
+
+print(f"\nNombre de motifs trouvés : {pattern_result['total_motifs']}")
+for i, motif in enumerate(pattern_result["patterns"]):
+    print(f"\nMotif {i+1}:")
+    for chain in motif:
+        print(" → Chaîne de positions :", chain)
