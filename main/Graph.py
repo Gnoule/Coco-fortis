@@ -14,7 +14,7 @@ class Graph:
         self.nodes = []
         self.grid = grid
         # first, we create the nodes (by giving the type of graph construction)
-        self.CreateNode(grid, 'COLOR')
+        self.CreateNode(grid, 'NEIGHBOR')
         #then, we create the edges of the graph
         self.CreateEdges(grid)
         # print(self.HasDuplicateShapes())
@@ -475,109 +475,42 @@ class Graph:
 
         return (first_pixel_output[0] - first_pixel_input[0], first_pixel_output[1], first_pixel_input[1])
 
-    # TODO check if two nodes have same color
+    # check if two nodes have same color
     @staticmethod
-    def CompareTwoNodesColor(input_graph, output_graph, node_input, node_output):
-        pass
-    
-    # TODO check number of pixels of two nodes
-    @staticmethod
-    def CompareTwoNodesSize(input_graph, output_graph, node_input, node_output):
-        pass
+    def CompareTwoNodesColor(graph_input, graph_output, node_input, node_output):
+        color_input = node_input.GetColor()
+        color_output = node_output.GetColor()
+        return color_input == color_output
 
-    # TODO check if node extend to another node
+    
+    #  check number of pixels of two nodes
+    @staticmethod
+    def CompareTwoNodesSize( node_input, node_output):
+        color_input = node_input.GetSize()
+        color_output = node_output.GetSize()
+        return color_input == color_output
+        
+
     @staticmethod
     def CompareNodeExtended(input_graph, output_graph, node_input):
-        pass
+        input_pixels = set(node_input.GetPixelPositions())
 
-    # @staticmethod
-    # def CompareGridSize(grid_input, grid_output):
-    #     pass
+        for node_out in output_graph.GetNodes():
+            output_pixels = set(node_out.GetPixelPositions())
 
-    # @staticmethod
-    # def CheckNodeOnOutput(grid_input, grid_output, node_input):
-    #     pass
+            # Check if this output node contains all pixels of the input node
+            if input_pixels.issubset(output_pixels):
+                # Check if it also contains pixels from other input nodes
+                extra_input_pixels = set()
+                for other_node in input_graph.GetNodes():
+                    if other_node == node_input:
+                        continue
+                    other_pixels = set(other_node.GetPixelPositions())
+                    if other_pixels & output_pixels:
+                        extra_input_pixels |= other_pixels
 
+                # If there are additional pixels from other input nodes → it's a merge
+                if extra_input_pixels:
+                    return True
 
-
-# grille = [
-#     [0, 0, 0, 0, 0, 1],
-#     [1, 1, 1, 0, 1, 1],
-#     [0, 1, 0, 0, 0, 1],
-#     [0, 0, 0, 0, 0, 0],
-#     [0, 1, 1, 1, 0, 0],
-#     [0, 0, 1, 0, 0, 1],
-# ]
-# startTime = datetime.now()
-# graph = Graph(grille)
-# for node in graph.nodes:
-#     print('yes = ', node.CheckUniColor()) 
-# print(datetime.now() - startTime)
-# graph.ShowGrid()
-
-
-# grid1 = [
-#     [9, 6, 5, 6, 9, 5, 3, 3, 5, 9, 6, 5, 6, 9, 5, 3, 3, 5, 9, 6, 5],
-#     [6, 3, 2, 3, 6, 2, 9, 9, 2, 0, 0, 0, 0, 0, 2, 9, 9, 2, 6, 3, 2],
-#     [5, 2, 1, 2, 5, 1, 8, 8, 1, 0, 0, 0, 0, 0, 1, 8, 8, 1, 5, 2, 1],
-#     [6, 3, 2, 3, 6, 2, 9, 9, 2, 0, 0, 0, 0, 0, 2, 9, 9, 2, 6, 3, 2],
-#     [9, 6, 5, 6, 9, 5, 3, 3, 5, 9, 6, 5, 6, 9, 5, 3, 3, 5, 9, 6, 5],
-#     [5, 2, 1, 2, 5, 1, 8, 8, 1, 5, 2, 1, 2, 5, 1, 8, 8, 1, 5, 2, 1],
-#     [3, 9, 8, 9, 3, 8, 6, 6, 8, 3, 9, 8, 9, 3, 8, 6, 6, 8, 3, 9, 8],
-#     [3, 9, 8, 9, 3, 8, 6, 6, 8, 3, 9, 8, 9, 3, 8, 6, 6, 8, 3, 9, 8],
-#     [5, 2, 1, 2, 0, 0, 0, 0, 1, 5, 2, 1, 2, 5, 1, 8, 8, 1, 5, 2, 1],
-#     [9, 6, 5, 6, 0, 0, 0, 0, 5, 9, 6, 5, 6, 9, 5, 3, 3, 5, 9, 6, 5],
-#     [6, 3, 2, 3, 0, 0, 0, 0, 2, 6, 3, 2, 3, 6, 2, 9, 9, 2, 6, 3, 2],
-#     [5, 2, 1, 2, 5, 1, 8, 8, 1, 5, 2, 1, 2, 5, 1, 8, 8, 1, 5, 2, 1],
-#     [6, 3, 2, 3, 6, 2, 9, 9, 2, 6, 3, 2, 3, 6, 0, 0, 9, 2, 6, 3, 2],
-#     [9, 6, 5, 6, 9, 5, 3, 3, 5, 9, 6, 5, 6, 9, 0, 0, 3, 5, 9, 6, 5],
-#     [5, 2, 1, 2, 5, 1, 8, 8, 1, 5, 2, 1, 2, 5, 0, 0, 8, 1, 5, 2, 1],
-#     [0, 0, 8, 9, 0, 0, 0, 6, 8, 3, 9, 8, 9, 3, 0, 0, 6, 8, 3, 9, 8],
-#     [0, 0, 8, 9, 0, 0, 0, 6, 8, 3, 9, 8, 9, 3, 8, 6, 6, 8, 3, 9, 8],
-#     [5, 2, 1, 2, 0, 0, 0, 8, 1, 5, 2, 1, 2, 5, 1, 8, 8, 1, 5, 2, 1],
-#     [9, 6, 5, 6, 0, 0, 0, 3, 5, 9, 6, 5, 6, 9, 5, 3, 3, 5, 9, 6, 5],
-#     [6, 3, 2, 3, 0, 0, 0, 9, 2, 6, 3, 2, 3, 6, 2, 9, 9, 2, 6, 3, 2],
-#     [5, 2, 1, 2, 5, 1, 8, 8, 1, 5, 2, 1, 2, 5, 1, 8, 8, 1, 5, 2, 1],
-# ]
-
-# graph = Graph(grid1)
-# groups = graph.FindNodesWithSameInternalPattern(2)
-
-# for i, group in enumerate(groups):
-#     print(f"\nPattern {i+1} trouvé dans {len(group)} nœuds :")
-#     for node in group:
-#         print(f" → Pixels: {sorted(node.GetPixelPositions())}")
-#         print(f" → Sous-pattern (valeurs = 2) : {sorted(node.ExtractSubPatternPositions(2))}")
-
-# grid1 = [
-#     [1, 0, 0, 0, 0],
-#     [0, 0, 0, 2, 0],
-#     [0, 0, 2, 2, 0],
-#     [1, 0, 0, 2, 0],
-#     [1, 1, 0, 0, 0],
-# ]
-
-# grid2 = [
-#     [0, 0, 0, 0, 0],
-#     [2, 0, 0, 0, 1],
-#     [2, 2, 0, 0, 0],
-#     [2, 0, 0, 0, 1],
-#     [0, 0, 0, 1, 1],
-# ]
-
-# g1 = Graph(grid1)
-# g2 = Graph(grid2)
-
-# print("Résultat de comparaison entre les deux graphes:")
-# results = Graph.CompareNodesBetweenGraphs(g1, g2)
-
-# for result in results:
-#     node1_pixels = sorted(result['node_input'].GetPixelPositions())
-#     print(f"\n→ Node in Graph 1: {node1_pixels}")
-#     print(f"Matches found: {result['match_count']}")
-#     for matched_node, rotation in result["matches"]:
-#         print(f"  Match with: {sorted(matched_node.GetPixelPositions())} — rotation: {rotation}°")
-
-
-
-
+        return False

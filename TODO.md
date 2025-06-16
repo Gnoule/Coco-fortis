@@ -10,10 +10,10 @@
 - [x] Obtenir la position d’un nœud  
 - [x] Visualisation graphique du graphe + affichage  
 - [x] Comparer deux nœuds  
-- [ ] Comparer les positions de deux nœuds  
-- [ ] Comparer les couleurs de deux nœuds  
-- [ ] Comparaison de la grille de sortie  
-- [ ] Comparaison d’un nœud en entrée et en sortie  
+- [x] Comparer les positions de deux nœuds  
+- [x] Comparer les couleurs de deux nœuds  
+- [x] Comparaison de la grille de sortie  
+- [x] Comparaison d’un nœud en entrée et en sortie  
 
 ## Fonction sur les noeuds
 
