@@ -215,6 +215,36 @@ class Graph:
         plt.axis('equal')  # respect des proportions
         plt.show()
 
+    def ShowGrid(self):
+        array = np.array(self.grid)
+        rows, cols = array.shape
+        cmap = colors.ListedColormap(['black', 'red', 'green', 'blue', 'orange', 'purple'])
+        bounds = [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5]
+        norm = colors.BoundaryNorm(bounds, cmap.N)
+        fig, ax = plt.subplots(figsize=(cols, rows))
+        im = ax.imshow(array, cmap=cmap, norm=norm)
+        # Ajouter une grille optionnelle
+        plt.grid(which='both', color='gray', linewidth=0.5)
+        plt.xticks(np.arange(len(self.grid[0])))
+        plt.yticks(np.arange(len(self.grid)))
+        plt.gca().invert_yaxis()  # pour garder (0,0) en haut à gauche
+        plt.gca().set_aspect('equal')
+        # Ticks exactement sur les bords des cellules
+        ax.set_xticks(np.arange(cols))
+        ax.set_yticks(np.arange(rows))
+        # Affichage des labels
+        ax.set_xticklabels(np.arange(cols))
+        ax.set_yticklabels(np.arange(rows))
+        # Grille aux bonnes positions
+        ax.set_xticks(np.arange(-0.5, cols, 1), minor=True)
+        ax.set_yticks(np.arange(-0.5, rows, 1), minor=True)
+        ax.grid(which='minor', color='gray', linestyle='-', linewidth=0.5)
+        # Réglages visuels
+        ax.tick_params(top=False, bottom=True, labeltop=False, labelbottom=True)
+        ax.invert_yaxis()
+        ax.set_aspect('equal')
+        plt.show()
+
     def SortNodesByColorAndSize(self):
         grouped_nodes = defaultdict(list)
 

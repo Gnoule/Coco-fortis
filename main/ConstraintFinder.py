@@ -46,9 +46,9 @@ def FindConstraintFromExample(training_input, training_output, want_time_log=Fal
         print(datetime.now() - startTime)
 
     # graph_input.ShowGrid()
-    # graph_input.ShowGraph()
-    # graph_output.ShowGrid()
-    # graph_output.ShowGraph()
+    graph_input.ShowGraph()
+    # graph_output.ShowGrid()   
+    graph_output.ShowGraph()
 
     # start finding constraint
 
@@ -117,9 +117,9 @@ def FindConstraintFromExample(training_input, training_output, want_time_log=Fal
         #AddConstraints(constraints_found, ConstraintType.DEACTIVE, None, ConstraintIfType.IF_NODE_UNKNOW, None)
         #constraints_found.append(Constraint(ConstraintType.DEACTIVE, None, ConstraintIfType.IF_NODE_UNKNOW))
 
-    #print("constraints_found = ", constraints_found)
+    print("constraints_found = ", constraints_found)
     final_constraints = FilterConstraintsIfTypes(constraints_found)
-    #print(final_constraints)
+    print(final_constraints)
     return final_constraints
 
 
