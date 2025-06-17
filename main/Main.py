@@ -1,6 +1,7 @@
 import json
 from ConstraintFinder import *
 from ConstraintResolver import *
+from ResolverFromCP import *
 from datetime import datetime
 
 example = ['39a8645d','28bf18c6','27a28665','25d487eb','08ed6ac7','7f4411dc']
@@ -121,6 +122,11 @@ startTime = datetime.now()
 constraints_brut.append(FindConstraintFromExample(input_example1, output_example1))
 constraints_brut.append(FindConstraintFromExample(input_example2, output_example2))
 final_constraint = FilterConstraint(constraints_brut)
-print("FINDING CONSTRAINTS = ", datetime.now() - startTime)
 print("final_constraint = ", final_constraint)
-Resolver(final_constraint, evaluation_example)
+
+result = Resolver(final_constraint, evaluation_example)
+
+
+graph = CreateResult(result, evaluation_example)
+print("FINDING CONSTRAINTS = ", datetime.now() - startTime)
+graph.ShowGrid()

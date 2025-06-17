@@ -2,6 +2,8 @@ from Graph import Graph
 from datetime import datetime
 from enum import Enum
 
+
+
 class ConstraintType(Enum):
     GRID_SIZE = 0   # size of the grid of output
     FORM_INPUT_EQUAL_FORM_OUTPUT = 1    # actual node needs to be in the output form
@@ -13,7 +15,7 @@ class ConstraintType(Enum):
     NODE_Y_FIXED = 7    # actual node needs to NOT move in y direction
     DEACTIVE = 8    #actual node needs to be deactivated
     EXTEND_TO_NODE = 9      # actual node needs to be extended to other node
-    CENTER_NODE = 10    # TODO center node to the grid
+    CENTER_NODE = 10    # center node to the grid
 
 class ConstraintIfType(Enum):
     NONE = 0    #no condition (apply to all nodes / apply to graph)
@@ -74,14 +76,16 @@ def FindConstraintFromExample(training_input, training_output, want_time_log=Fal
                 type = current['type']
                 value = current['value']
                 AddConstraints(constraints_found, ConstraintType.FORM_INPUT_EQUAL_FORM_OUTPUT, None, type, value)
-                AddConstraints(constraints_found, ConstraintType.FORM_OUTPUT_COLOR, input_node.GetColor(), type, value)
+                AddConstraints(constraints_found, ConstraintType.FORM_OUTPUT_COLOR, output_node.GetColor(), type, value)
 
                 compare_pos = Graph.CompareTwoNodesPosition(graph_input, graph_output, input_node, output_node)
                 if compare_pos[0] == 0:
                     AddConstraints(constraints_found, ConstraintType.NODE_X_FIXED, None, type, value)
                 if compare_pos[1] == 0:
                     AddConstraints(constraints_found, ConstraintType.NODE_Y_FIXED, None,type, value)
-            
+
+                if graph_output.IsNodeInCenter(output_node):
+                    AddConstraints(constraints_found, ConstraintType.CENTER_NODE, None, type, value)
             
             # constraints_found.append(Constraint(ConstraintType.FORM_INPUT_EQUAL_FORM_OUTPUT, None, current_if_types))
             # constraints_found.append(Constraint(ConstraintType.FORM_OUTPUT_COLOR, input_node.GetColor(), current_if_types))
@@ -149,7 +153,7 @@ def AddConstraints(constraints_found, constraint_type, constraint_value, constra
 
 
 
-# TODO function to check a lot of informations on current node to check what are the conditions for adding the constraints (color, size, edges connections, ...)
+# function to check a lot of informations on current node to check what are the conditions for adding the constraints (color, size, edges connections, ...)
 def GetConstraintIfTypes(current_node, input_graph):
     all_constraint_if_types = []
 
@@ -251,12 +255,12 @@ def FilterConstraint(examples_constraints):
                             # if constraints if values of both are same (not contradicting) so we add it to the official values (+check before if already in list so no double values)
                             if (set(current_constraint['constraints_if'][current_constraint_if]) == set(current_constraint_tested['constraints_if'][current_constraint_if]) 
                             and current_constraint_if not in constraint_to_add[name_constraint]['constraints_if']):
-                                constraint_to_add[name_constraint]['constraints_if'][current_constraint_if] = current_constraint['constraints_if'][current_constraint_if]
+                                constraint_to_add[name_constraint]['constraints_if'][current_constraint_if] = current_constraint['constraints_if'][current_constraint_if][0]    # TODO [0] not sure
                             # else, constraints are contradicting, if already in the liste, we delete it 
                             else:
                                 if current_constraint_if in constraint_to_add[name_constraint]['constraints_if']:
                                     del constraint_to_add[name_constraint]['constraints_if'][current_constraint_if]
                         else:
-                            constraint_to_add[name_constraint]['constraints_if'][current_constraint_if] = current_constraint_tested['constraints_if'][current_constraint_if]
+                            constraint_to_add[name_constraint]['constraints_if'][current_constraint_if] = current_constraint_tested['constraints_if'][current_constraint_if][0]  # TODO [0] not sure
 
     return constraint_to_add                 
