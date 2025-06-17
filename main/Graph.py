@@ -177,7 +177,6 @@ class Graph:
         print(self.nodes)
 
 
-
     def GetNodePositions(self):
         max_y = max(node.GetApproximatePixelPos()[1] for node in self.nodes)
         return {node: (node.GetApproximatePixelPos()[0], max_y - node.GetApproximatePixelPos()[1]) for node in self.nodes}
@@ -282,6 +281,24 @@ class Graph:
     # get nodes
     def GetNodes(self):
         return self.nodes
+
+
+    def IsNodeInCenter(self, node=None, pixel_pos=None):
+        if node != None:
+            max_min = Node.GetMinMaxPos(node.GetPixelPositions())
+        if pixel_pos != None:
+            max_min = Node.GetMinMaxPos(pixel_pos)
+        
+        
+        dist_left = max_min['min_x']
+        dist_right = len(self.grid[0]) - max_min['max_x'] - 1
+
+        dist_up = max_min['min_y']
+        dist_down = len(self.grid) - max_min['max_y'] - 1
+        if dist_left == dist_right and dist_up == dist_down:
+            return True
+        return False
+
 
 
     ##### UTILITARIES (COMPARE BETWEEN TWO GRAPHS) #######
@@ -545,3 +562,39 @@ class Graph:
                     return True
 
         return False
+    
+
+
+
+
+
+
+
+
+
+    #### FUNCTION POUR MODIFIER LE GRAPH APRES COUP ####
+
+
+    def RebuildGridAndGraph(self):
+        pass
+
+    def DeactivateNode(self, node):
+        #node.DeactivateNode()
+        all_pos = node.GetPixelPositions()
+        for pos in all_pos:
+            self.grid[pos[1]][pos[0]] = 0
+
+    def MoveNode(self, node, move_x, move_y):
+        all_pos = node.GetPixelPositions()
+        all_new_pos = []
+        for pos in all_pos:
+            new_pos = (pos[0] + move_x, pos[1] + move_y)
+            all_new_pos.append(new_pos)
+            self.grid[pos[1]][pos[0]] = 0
+            self.grid[new_pos[1]][new_pos[0]] = 1
+        node.SetPixelPositions(all_new_pos)
+
+    def RecolorNode(self, node, color):
+        all_pos = node.GetPixelPositions()
+        for pos in all_pos:
+            self.grid[pos[1]][pos[0]] = color

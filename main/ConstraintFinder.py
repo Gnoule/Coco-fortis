@@ -15,7 +15,7 @@ class ConstraintType(Enum):
     NODE_Y_FIXED = 7    # actual node needs to NOT move in y direction
     DEACTIVE = 8    #actual node needs to be deactivated
     EXTEND_TO_NODE = 9      # actual node needs to be extended to other node
-    CENTER_NODE = 10    # TODO center node to the grid
+    CENTER_NODE = 10    # center node to the grid
 
 class ConstraintIfType(Enum):
     NONE = 0    #no condition (apply to all nodes / apply to graph)
@@ -48,9 +48,9 @@ def FindConstraintFromExample(training_input, training_output, want_time_log=Fal
         print(datetime.now() - startTime)
 
     # graph_input.ShowGrid()
-    graph_input.ShowGraph()
+    # graph_input.ShowGraph()
     # graph_output.ShowGrid()   
-    graph_output.ShowGraph()
+    # graph_output.ShowGraph()
 
     # start finding constraint
 
@@ -76,14 +76,16 @@ def FindConstraintFromExample(training_input, training_output, want_time_log=Fal
                 type = current['type']
                 value = current['value']
                 AddConstraints(constraints_found, ConstraintType.FORM_INPUT_EQUAL_FORM_OUTPUT, None, type, value)
-                AddConstraints(constraints_found, ConstraintType.FORM_OUTPUT_COLOR, input_node.GetColor(), type, value)
+                AddConstraints(constraints_found, ConstraintType.FORM_OUTPUT_COLOR, output_node.GetColor(), type, value)
 
                 compare_pos = Graph.CompareTwoNodesPosition(graph_input, graph_output, input_node, output_node)
                 if compare_pos[0] == 0:
                     AddConstraints(constraints_found, ConstraintType.NODE_X_FIXED, None, type, value)
                 if compare_pos[1] == 0:
                     AddConstraints(constraints_found, ConstraintType.NODE_Y_FIXED, None,type, value)
-            
+
+                if graph_output.IsNodeInCenter(output_node):
+                    AddConstraints(constraints_found, ConstraintType.CENTER_NODE, None, type, value)
             
             # constraints_found.append(Constraint(ConstraintType.FORM_INPUT_EQUAL_FORM_OUTPUT, None, current_if_types))
             # constraints_found.append(Constraint(ConstraintType.FORM_OUTPUT_COLOR, input_node.GetColor(), current_if_types))
@@ -134,7 +136,7 @@ def AddConstraints(constraints_found, constraint_type, constraint_value, constra
 
 
 
-# TODO function to check a lot of informations on current node to check what are the conditions for adding the constraints (color, size, edges connections, ...)
+# function to check a lot of informations on current node to check what are the conditions for adding the constraints (color, size, edges connections, ...)
 def GetConstraintIfTypes(current_node, input_graph):
     all_constraint_if_types = []
 

@@ -123,7 +123,33 @@ def Resolver(final_constraint, input_grid):
                         satisfy(nodex_active[i] == 0)
                     continue
                 case ConstraintType.FORM_OUTPUT_COLOR:
-                    continue
+                    if CreateCondition(final_constraint[constraint]['constraints_if'], nodes[i], graph_input):
+                        satisfy (
+                            If(nodex_active[i] == 1, Then=(nodex_color[i] == final_constraint[constraint]['value']))
+                        ) 
+                case ConstraintType.CENTER_NODE:
+                    if CreateCondition(final_constraint[constraint]['constraints_if'], nodes[i], graph_input):
+                        node_pos = pos_found[i]
+                        x_coords = [x for x, y in node_pos]
+                        y_coords = [y for x, y in node_pos]
+
+                        min_x = Minimum(x_coords)
+                        max_x = Maximum(x_coords)
+                        min_y = Minimum(y_coords)
+                        max_y = Maximum(y_coords)
+
+                        grid_width = size
+                        grid_height = size
+                        dist_left = min_x
+                        dist_right = grid_width - max_x - 1
+                        dist_up = min_y
+                        dist_down = grid_height - max_y - 1
+
+                        satisfy(
+                            If(nodex_active[i] == 1,
+                                Then=(abs(dist_left - dist_right) <= 1) & (abs(dist_up - dist_down) <= 1)
+                            )
+                        )
 
 
     compile()

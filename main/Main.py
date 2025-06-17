@@ -71,7 +71,11 @@ startTime = datetime.now()
 constraints_brut.append(FindConstraintFromExample(input_example1, output_example1))
 constraints_brut.append(FindConstraintFromExample(input_example2, output_example2))
 final_constraint = FilterConstraint(constraints_brut)
-print("FINDING CONSTRAINTS = ", datetime.now() - startTime)
 print("final_constraint = ", final_constraint)
+
 result = Resolver(final_constraint, evaluation_example)
-CreateResult(result, evaluation_example)
+
+
+graph = CreateResult(result, evaluation_example)
+print("FINDING CONSTRAINTS = ", datetime.now() - startTime)
+graph.ShowGrid()

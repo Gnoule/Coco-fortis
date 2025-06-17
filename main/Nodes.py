@@ -14,6 +14,7 @@ class Node:
         self.directly_connected_nodes = []
         self.pixel_positions = pixel_position
         self.pixel_colors = pixel_colors
+        self.activate = True
 
 
     # connection_type = HORIZONTAL OR VERTICAL
@@ -31,8 +32,17 @@ class Node:
     def GetPixelPositions(self):
         return self.pixel_positions
 
+    def SetPixelPositions(self, new_pos):
+        self.pixel_positions = new_pos
+
     def GetApproximatePixelPos(self):
         return self.pixel_positions[0]
+    
+    def DeactivateNode(self):
+        self.activate = False
+
+    def GetActiveStatus(self):
+        return self.activate
 
     def BiggerSize(self, size):
         if (size >= self.size):
@@ -57,6 +67,10 @@ class Node:
             return self.pixel_colors[self.pixel_positions[0]]
         return self.color
     
+    # TODO
+    def SetColor(self, new_color):
+        pass
+    
     # return size
     def GetSize(self):
         return self.size
@@ -70,7 +84,34 @@ class Node:
         if len(self.directly_connected_nodes) > 0:
             return True
         return False 
-    
+
+    # function to get the min pos and max pos (on X and Y)
+    #return : {max_x:val, max_y:val, min_x:val, min_y:val}
+    @staticmethod
+    def GetMinMaxPos(pixel_positions):
+        min_x = pixel_positions[0][0]
+        min_y = pixel_positions[0][1]
+        max_x = pixel_positions[0][0]
+        max_y = pixel_positions[0][1]
+        for pos in pixel_positions:
+            if pos[0] < min_x:
+                min_x = pos[0]
+            if pos[0] > max_x:
+                max_x = pos[0]
+
+            if pos[1] < min_y:
+                min_y = pos[1]
+            if pos[1] > max_y:
+                max_y = pos[1]
+        
+        return {
+            "min_x": min_x,
+            "min_y": min_y,
+            "max_x": max_x,
+            "max_y": max_y
+        }
+
+             
     
     # Start of functions that will take care of rotations
     @staticmethod
