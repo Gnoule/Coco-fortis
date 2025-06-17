@@ -530,17 +530,18 @@ class Graph:
 
             # Check if this output node contains all pixels of the input node
             if input_pixels.issubset(output_pixels):
+                involved_inputs = [node_input]
+
                 # Check if it also contains pixels from other input nodes
-                extra_input_pixels = set()
                 for other_node in input_graph.GetNodes():
                     if other_node == node_input:
                         continue
                     other_pixels = set(other_node.GetPixelPositions())
                     if other_pixels & output_pixels:
-                        extra_input_pixels |= other_pixels
+                        involved_inputs.append(other_node)
 
-                # If there are additional pixels from other input nodes → it's a merge
-                if extra_input_pixels:
-                    return True
+                if len(involved_inputs) > 1:
+                    return involved_inputs, node_out  # Return all involved nodes and merged output node
 
-        return False
+        return None, None
+

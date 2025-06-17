@@ -46,9 +46,9 @@ def FindConstraintFromExample(training_input, training_output, want_time_log=Fal
         print(datetime.now() - startTime)
 
     # graph_input.ShowGrid()
-    graph_input.ShowGraph()
+    # graph_input.ShowGraph()
     # graph_output.ShowGrid()   
-    graph_output.ShowGraph()
+    # graph_output.ShowGraph()
 
     # start finding constraint
 
@@ -105,17 +105,34 @@ def FindConstraintFromExample(training_input, training_output, want_time_log=Fal
            
 
         #     continue
-        
-        # result_compare_extended = Graph.CompareNodeExtended(graph_input, graph_output, input_node)
-        # if result_compare_extended['match_found'] > 0:
-        #     current_if_types = GetConstraintIfTypes(input_node, graph_input)
 
-        #     # constraints_found.append(Constraint(ConstraintType.EXTEND_TO_NODE, None, current_if_types))
-        
-        #     continue
+        involved_inputs, merged_node = Graph.CompareNodeExtended(graph_input, graph_output, input_node)
+        if involved_inputs and merged_node:
+            # Check if all involved input nodes have not moved (i.e., they still exist fully in the merged node)
+            fixed = True
+            for n in involved_inputs:
+                # Each node must have all its original pixels present in the merged output node
+                node_pixels = set(n.GetPixelPositions())
+                merged_pixels = set(merged_node.GetPixelPositions())
 
-        #AddConstraints(constraints_found, ConstraintType.DEACTIVE, None, ConstraintIfType.IF_NODE_UNKNOW, None)
-        #constraints_found.append(Constraint(ConstraintType.DEACTIVE, None, ConstraintIfType.IF_NODE_UNKNOW))
+                # Verify that all pixels from the input node are still present in the merged node (i.e., no displacement)
+                if not node_pixels.issubset(merged_pixels):
+                    fixed = False
+                    break
+
+            if fixed:
+                # If the nodes are fixed in position, register a constraint indicating they are merged
+                for current in GetConstraintIfTypes(input_node, graph_input):
+                    type = current['type']
+                    value = current['value']
+                    AddConstraints(constraints_found, ConstraintType.EXTEND_TO_NODE, None, type, value)
+
+            continue
+
+
+
+        # AddConstraints(constraints_found, ConstraintType.DEACTIVE, None, ConstraintIfType.IF_NODE_UNKNOW, None)
+        # constraints_found.append(Constraint(ConstraintType.DEACTIVE, None, ConstraintIfType.IF_NODE_UNKNOW))
 
     print("constraints_found = ", constraints_found)
     final_constraints = FilterConstraintsIfTypes(constraints_found)
