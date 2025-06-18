@@ -45,20 +45,30 @@ def Resolver(final_constraint, input_grid):
             grid.append(inter)
     else:
         return
+        
 
     # TODO if grid is superior than original grid, replace old grid by new one
 
+
+
+    if ConstraintType.NUMBER_NODES_OUTPUT in final_constraint:
+        nb_nodes = final_constraint[ConstraintType.NUMBER_NODES_OUTPUT]['value'][0]
+    else:
+        return
 
     # VARIABLES 
 
     # FOR EACH NODES
     node_size = graph_input.GetNumberNodes()
     nodes = graph_input.GetNodes()
+    original_size = graph_input.GetGridSize()
+    graph_input.SetNewGrid(grid)
 
-    nodex_offset_x = VarArray(size=[node_size], dom=range(-size, size))
-    nodex_offset_y = VarArray(size=[node_size], dom=range(-size, size))
+    nodex_offset_x = VarArray(size=[node_size], dom=range(-original_size, original_size))
+    nodex_offset_y = VarArray(size=[node_size], dom=range(-original_size, original_size))
     nodex_color = VarArray(size=[node_size], dom=range(10))
     nodex_active = VarArray(size=[node_size], dom=(0, 1))
+    grid_size = Var(dom=(size))
 
     print("size = ", size)
     print("node_size = ", node_size)
@@ -67,11 +77,15 @@ def Resolver(final_constraint, input_grid):
     print("nodex_offset_y = ", nodex_offset_y)
     print("nodex_color = ", nodex_color)
     print("nodex_active = ", nodex_active)
+    print("grid_size = ", grid_size)
     #nodex_rot = VarArray(size=[node_size], dom=(0, 45, 90, 135))
     #nodex_extend_to = VarArray(size=[node_size], dom=range(node_size))
     
 
 
+    satisfy(
+        grid_size == size
+    )
 
     # CONSTRAINTS
 
@@ -108,7 +122,7 @@ def Resolver(final_constraint, input_grid):
 
     # BASIC CONSTRAINT: number of nodes in output
     satisfy(
-        Sum(nodex_active) == 1
+        Sum(nodex_active) == nb_nodes
     )
 
     # COMPLEX CONSTRAINT: Constraints found
@@ -166,7 +180,8 @@ def Resolver(final_constraint, input_grid):
             "nodex_offset_x": values(nodex_offset_x),
             "nodex_offset_y": values(nodex_offset_y),
             "nodex_color": values(nodex_color),
-            "nodex_active":values(nodex_active)
+            "nodex_active":values(nodex_active),
+            "grid_size":value(grid_size)
         }
     
     else:

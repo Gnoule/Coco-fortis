@@ -14,7 +14,7 @@ class Graph:
         self.nodes = []
         self.grid = grid
         # first, we create the nodes (by giving the type of graph construction)
-        self.CreateNode(grid, 'NEIGHBOR')
+        self.CreateNode(grid, 'COLOR')
         #then, we create the edges of the graph
         self.CreateEdges(grid)
         # print(self.HasDuplicateShapes())
@@ -218,8 +218,8 @@ class Graph:
     def ShowGrid(self):
         array = np.array(self.grid)
         rows, cols = array.shape
-        cmap = colors.ListedColormap(['black', 'red', 'green', 'blue', 'orange', 'purple'])
-        bounds = [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5]
+        cmap = colors.ListedColormap(['black', 'red', 'green', 'blue', 'orange', 'purple', 'yellow', 'cyan', 'grey', 'brown', 'pink'])
+        bounds = np.arange(-0.5, 11.5, 1)
         norm = colors.BoundaryNorm(bounds, cmap.N)
         fig, ax = plt.subplots(figsize=(cols, rows))
         im = ax.imshow(array, cmap=cmap, norm=norm)
@@ -273,6 +273,9 @@ class Graph:
     # TODO: return x len and y len
     def GetGridSize(self):
         return len(self.grid)
+    
+    def SetNewGrid(self, new_grid):
+        self.grid = new_grid
 
     # TODO
     def GetNumberNodes(self):
@@ -562,6 +565,8 @@ class Graph:
                     return involved_inputs, node_out  # Return all involved nodes and merged output node
 
         return None, None
+    
+
 
     
 
@@ -599,3 +604,13 @@ class Graph:
         all_pos = node.GetPixelPositions()
         for pos in all_pos:
             self.grid[pos[1]][pos[0]] = color
+
+
+    def ResizeGrid(self, size):
+        new_grid = []
+        for y in range (size):
+            grid_inter = []
+            for x in range (size):
+                grid_inter.append(self.grid[y][x])
+            new_grid.append(grid_inter)
+        self.grid = new_grid
