@@ -3,11 +3,12 @@ __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
+Main.xml
 
 # Environment
 .env
 .venv/
-venv/
+venv310/
 env/
 ENV/
 
