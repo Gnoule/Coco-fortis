@@ -3,6 +3,7 @@ from ConstraintFinder import *
 from ConstraintResolver import *
 from ResolverFromCP import *
 from datetime import datetime
+import copy
 
 example = ['39a8645d','28bf18c6','27a28665','25d487eb','08ed6ac7','7f4411dc']
 
@@ -131,14 +132,14 @@ def Finder(examples, evaluation):
     final_constraint = FilterConstraint(constraints_brut)
     print("final_constraint = ", final_constraint)
     
-    result = Resolver(final_constraint, evaluation[0]['input'])
+    input_graph = Graph(copy.deepcopy(evaluation[0]['input']))
 
-    input_graph = Graph(evaluation[0]['input'])
+    result = Resolver(final_constraint, evaluation[0]['input'])
 
     graph = CreateResult(result, evaluation[0]['input'])
     print("FINDING CONSTRAINTS = ", datetime.now() - startTime)
     if graph != None:
-        #input_graph.ShowGrid()
+        input_graph.ShowGrid()
         graph.ShowGrid()
 
 
