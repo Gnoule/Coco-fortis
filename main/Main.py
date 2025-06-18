@@ -7,64 +7,68 @@ from datetime import datetime
 example = ['39a8645d','28bf18c6','27a28665','25d487eb','08ed6ac7','7f4411dc']
 
 data = None
-with open('training/7f4411dc.json') as json_file:
+with open('training/39a8645d.json') as json_file:
     data = json.load(json_file)
 
 
 training_examples = data['train']
-input_example = training_examples[0]['input']
-output_example = training_examples[0]['output']
 
-input_example1 = [
-    [0, 1, 0, 0, 0, 0, 0],
-    [1, 1, 1, 0, 0, 0, 0],
-    [0, 1, 0, 0, 1, 0, 0],
-    [0, 0, 0, 1, 1, 1, 0],
-    [0, 0, 0, 0, 1, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0],
-]
+#print(training_examples[2]['input'])
+#graph = Graph(training_examples[2]['input'])
+#graph.ShowGrid()
+# input_example = training_examples[0]['input']
+# output_example = training_examples[0]['output']
 
-output_example1 = [
-    [0, 1, 0, 0, 0, 0, 0],
-    [1, 1, 1, 0, 0, 0, 0],
-    [0, 1, 0, 0, 1, 0, 0],
-    [0, 1, 1, 1, 1, 1, 0],
-    [0, 0, 0, 0, 1, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0],
-]
+# input_example1 = [
+#     [0, 1, 0, 0, 0, 0, 0],
+#     [1, 1, 1, 0, 0, 0, 0],
+#     [0, 1, 0, 0, 1, 0, 0],
+#     [0, 0, 0, 1, 1, 1, 0],
+#     [0, 0, 0, 0, 1, 0, 0],
+#     [0, 0, 0, 0, 0, 0, 0],
+#     [0, 0, 0, 0, 0, 0, 0],
+# ]
 
-input_example2 = [
-    [0, 0, 2, 0, 0, 0, 0],
-    [0, 2, 2, 2, 0, 0, 0],
-    [0, 0, 2, 0, 0, 2, 0],
-    [0, 0, 0, 0, 2, 2, 2],
-    [0, 0, 0, 0, 0, 2, 0],
-    [0, 1, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0],
-]
+# output_example1 = [
+#     [0, 1, 0, 0, 0, 0, 0],
+#     [1, 1, 1, 0, 0, 0, 0],
+#     [0, 1, 0, 0, 1, 0, 0],
+#     [0, 1, 1, 1, 1, 1, 0],
+#     [0, 0, 0, 0, 1, 0, 0],
+#     [0, 0, 0, 0, 0, 0, 0],
+#     [0, 0, 0, 0, 0, 0, 0],
+# ]
 
-output_example2 = [
-    [0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 3, 0, 0, 0],
-    [0, 0, 3, 3, 3, 0, 0],
-    [0, 0, 0, 3, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0],
-]
+# input_example2 = [
+#     [0, 0, 2, 0, 0, 0, 0],
+#     [0, 2, 2, 2, 0, 0, 0],
+#     [0, 0, 2, 0, 0, 2, 0],
+#     [0, 0, 0, 0, 2, 2, 2],
+#     [0, 0, 0, 0, 0, 2, 0],
+#     [0, 1, 0, 0, 0, 0, 0],
+#     [0, 0, 0, 0, 0, 0, 0],
+# ]
+
+# output_example2 = [
+#     [0, 0, 0, 0, 0, 0, 0],
+#     [0, 0, 0, 0, 0, 0, 0],
+#     [0, 0, 0, 3, 0, 0, 0],
+#     [0, 0, 3, 3, 3, 0, 0],
+#     [0, 0, 0, 3, 0, 0, 0],
+#     [0, 0, 0, 0, 0, 0, 0],
+#     [0, 0, 0, 0, 0, 0, 0],
+# ]
 
 
-evaluation_example = [
-    [0, 4, 0, 0, 0, 4, 0],
-    [4, 4, 4, 0, 4, 4, 4],
-    [0, 0, 0, 0, 0, 0, 0],
-    [1, 0, 0, 0, 0, 0, 0],
-    [1, 0, 0, 4, 0, 0, 1],
-    [0, 0, 4, 4, 4, 0, 1],
-    [0, 0, 0, 0, 0, 0, 0],
-]
+# evaluation_example = [
+#     [0, 4, 0, 0, 0, 4, 0],
+#     [4, 4, 4, 0, 4, 4, 4],
+#     [0, 0, 0, 0, 0, 0, 0],
+#     [1, 0, 0, 0, 0, 0, 0],
+#     [1, 0, 0, 4, 0, 0, 1],
+#     [0, 0, 4, 4, 4, 0, 1],
+#     [0, 0, 0, 0, 0, 0, 0],
+# ]
 
 # input_example1 = [
 #     [0, 1, 0, 0, 0, 1, 0],
@@ -117,16 +121,25 @@ evaluation_example = [
 #     [0, 0, 0, 0, 0, 0, 0],
 # ]
 
-constraints_brut = []
-startTime = datetime.now()
-constraints_brut.append(FindConstraintFromExample(input_example1, output_example1))
-constraints_brut.append(FindConstraintFromExample(input_example2, output_example2))
-final_constraint = FilterConstraint(constraints_brut)
-print("final_constraint = ", final_constraint)
-
-result = Resolver(final_constraint, evaluation_example)
 
 
-graph = CreateResult(result, evaluation_example)
-print("FINDING CONSTRAINTS = ", datetime.now() - startTime)
-graph.ShowGrid()
+def Finder(examples, evaluation):
+    constraints_brut = []
+    startTime = datetime.now()
+    for example in examples:
+        constraints_brut.append(FindConstraintFromExample(example['input'], example['output']))
+    final_constraint = FilterConstraint(constraints_brut)
+    print("final_constraint = ", final_constraint)
+    
+    result = Resolver(final_constraint, evaluation[0]['input'])
+
+    input_graph = Graph(evaluation[0]['input'])
+
+    graph = CreateResult(result, evaluation[0]['input'])
+    print("FINDING CONSTRAINTS = ", datetime.now() - startTime)
+    if graph != None:
+        #input_graph.ShowGrid()
+        graph.ShowGrid()
+
+
+Finder(data['train'], data['test'])

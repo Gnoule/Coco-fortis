@@ -214,6 +214,7 @@ def FilterConstraintsIfTypes(constraints_found):
 # cancerous function warning
 def FilterConstraint(examples_constraints):
     constraint_to_add = {}
+    constraint_if_deleted = {}  # will be useful to avoid putting contraint_if already deleted 
     constraint_visited = []
     # test all found examples
     for index_constraints_found in range(len(examples_constraints)): 
@@ -227,6 +228,8 @@ def FilterConstraint(examples_constraints):
 
             constraint_to_add[name_constraint] = {'value': [], 'constraints_if': {}}
             constraint_to_add[name_constraint]['value'].append(current_constraint['value'])
+
+            constraint_if_deleted[name_constraint] = []
             
 
             # check n+1 example
@@ -240,7 +243,7 @@ def FilterConstraint(examples_constraints):
 
                     # first: if value for the constraint is not the same, we add it
                     if constraint_to_add[name_constraint]['value'] != current_constraint_tested['value']:
-                        constraint_to_add[name_constraint]['value'].append(current_constraint_tested['value'])
+                        constraint_to_add[name_constraint]['value'].append(current_constraint_tested['value'])  #TODO
 
 
                     # second: constraints_if, we check if there is same constraints_if
@@ -252,12 +255,19 @@ def FilterConstraint(examples_constraints):
                         # if other constraint (on other example) as same constraint if as this one
                         if current_constraint_if in current_constraint_tested['constraints_if']:
                             
-                            # if constraints if values of both are same (not contradicting) so we add it to the official values (+check before if already in list so no double values)
-                            if (set(current_constraint['constraints_if'][current_constraint_if]) == set(current_constraint_tested['constraints_if'][current_constraint_if]) 
-                            and current_constraint_if not in constraint_to_add[name_constraint]['constraints_if']):
-                                constraint_to_add[name_constraint]['constraints_if'][current_constraint_if] = current_constraint['constraints_if'][current_constraint_if][0]    # TODO [0] not sure
-                            # else, constraints are contradicting, if already in the liste, we delete it 
+                            if current_constraint_if == ConstraintIfType.IF_SIZE:
+                                print()
+
+                            # if constraints if values of both are same (not contradicting) so we add it to the official values (+check before if already in list so no double values + if not deleted on previous constraint search)
+                            if set(current_constraint['constraints_if'][current_constraint_if]) == set(current_constraint_tested['constraints_if'][current_constraint_if]):
+                                if current_constraint_if not in constraint_if_deleted[name_constraint] and current_constraint_if not in constraint_to_add[name_constraint]['constraints_if']:
+                                    constraint_to_add[name_constraint]['constraints_if'][current_constraint_if] = current_constraint['constraints_if'][current_constraint_if][0]    # TODO [0] not sure
+                            # else, constraints are contradicting, if already in the liste, we delete it
                             else:
+
+                                # we append this to never use for this constraint the constraint_if
+                                constraint_if_deleted[name_constraint].append(current_constraint_if)
+                                
                                 if current_constraint_if in constraint_to_add[name_constraint]['constraints_if']:
                                     del constraint_to_add[name_constraint]['constraints_if'][current_constraint_if]
                         else:
