@@ -1,0 +1,21 @@
+<instance format="XCSP3" type="COP">
+  <variables>
+    <array id="nodex_active" size="[9]"> 0 1 </array>
+    <array id="nodex_offset_x" size="[9]"> -10..9 </array>
+    <array id="nodex_offset_y" size="[9]"> -10..9 </array>
+    <array id="nodex_color" size="[9]"> 0..9 </array>
+  </variables>
+  <constraints>
+    <sum>
+      <list> nodex_active[] </list>
+      <condition> (ge,1) </condition>
+    </sum>
+    <sum>
+      <list> nodex_offset_x[] </list>
+      <condition> (ge,-90) </condition>
+    </sum>
+  </constraints>
+  <objectives>
+    <maximize type="sum"> nodex_active[] </maximize>
+  </objectives>
+</instance>

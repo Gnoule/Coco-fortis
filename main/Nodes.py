@@ -3,7 +3,7 @@ import math
 # COLOR : NONE(GREY), RED, BLUE, GREEN, 
 
 class Node:
-    def __init__(self, pixel_position, pixel_colors={}, color='grey'):
+    def __init__(self, pixel_position, pixel_colors={}, color='grey', name="0"):
         self.size = len(pixel_position)
         # used if nodes are all same colors
         if (pixel_colors == {}):
@@ -15,15 +15,24 @@ class Node:
         self.pixel_positions = pixel_position
         self.pixel_colors = pixel_colors
         self.activate = True
+        self.name = name
+        self.centered_in_nodes = False
 
 
     # connection_type = HORIZONTAL OR VERTICAL
     # diff = difference between this node and other node
     def AddAssociatedNode(self, new_node, connection_type, diff):
-        if (new_node in self.associated_nodes):
-            return
-        self.associated_nodes.append((new_node, connection_type))
-        if diff <= 1:
+        i = 0
+        for val in self.associated_nodes:
+            if new_node == val[0]:
+                if abs(diff) <= abs(val[2]):
+                    del self.associated_nodes[i]
+                    break 
+                else:
+                    return
+            i += 1
+        self.associated_nodes.append([new_node, connection_type, diff])
+        if abs(diff) <= 1:
             self.directly_connected_nodes.append(new_node)
 
     def GetAssociatedNode(self):
@@ -43,6 +52,12 @@ class Node:
 
     def GetActiveStatus(self):
         return self.activate
+    
+    def GetCenteredInNodes(self):
+        return self.centered_in_nodes
+    
+    def SetCenteredInNodes(self, value):
+        self.centered_in_nodes = value
 
     def BiggerSize(self, size):
         if (size >= self.size):

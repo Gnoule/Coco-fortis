@@ -7,6 +7,8 @@ from matplotlib import colors
 from collections import defaultdict
 from matplotlib import colors
 import json
+import copy
+from math import sqrt
 
 class Graph:
 
@@ -17,6 +19,8 @@ class Graph:
         self.CreateNode(grid, 'COLOR')
         #then, we create the edges of the graph
         self.CreateEdges(grid)
+        # we then check special properties
+        self.CheckProperties()
         # print(self.HasDuplicateShapes())
         self.active = True
 
@@ -41,10 +45,10 @@ class Graph:
                 if type == "NEIGHBOR":
                     pixel_color_found[(x,y)] = pixel_value
                     self.CreateNodeWithNeighbors(grid, [x,y], pixel_found, pixel_color_found, pos_already_visited)
-                    node = Node(pixel_found, pixel_color_found) 
+                    node = Node(pixel_found, pixel_color_found, name=len(self.nodes)) 
                 elif type == "COLOR":
                     self.CreateNodeWithColor(grid, [x,y], pixel_found, pixel_value, pos_already_visited)
-                    node = Node(pixel_found, color=pixel_value) 
+                    node = Node(pixel_found, color=pixel_value, name=len(self.nodes)) 
                 # end of the search, we add the pixels to the node created
                 self.nodes.append(node)
         print(pos_already_visited)
@@ -154,7 +158,7 @@ class Graph:
                     if (grid[pos_tested[1]][pos_tested[0]] != 0 and pos_tested not in pixels):
                         if pos_tested in pixels_associated:
                             diff = pos[0] - x
-                            node.AddAssociatedNode(pixels_associated[pos_tested], "HORIZONTAL", diff)
+                            node.AddAssociatedNode(pixels_associated[pos_tested], "HORIZONTAL", -diff)
                             break
 
                 # DOWN DIRECTION        
@@ -172,9 +176,102 @@ class Graph:
                     if (grid[pos_tested[1]][pos_tested[0]] != 0 and pos_tested not in pixels):
                         if pos_tested in pixels_associated:
                             diff = pos[1] - y
-                            node.AddAssociatedNode(pixels_associated[pos_tested], "VERTICAL", diff)
+                            node.AddAssociatedNode(pixels_associated[pos_tested], "VERTICAL", -diff)
                             break
         print(self.nodes)
+
+
+
+    def node_signature(self, nodes):
+        return tuple(sorted(id(n) for n in nodes))
+
+
+    def CheckProperties(self):
+        centered = []
+        all_visited = []
+        for node in self.nodes:
+            if node in all_visited:
+                continue
+            association = node.GetAssociatedNode()
+            result, path = self.CheckGroup(node, association, [], all_visited)
+            if result:
+                path.append(node)
+                min_x_found = path[0].GetPixelPositions()[0][0]
+                max_x_found = path[0].GetPixelPositions()[0][0]
+                min_y_found = path[0].GetPixelPositions()[0][1]
+                max_y_found = path[0].GetPixelPositions()[0][1]
+                for n in path:
+                    all_visited.append(n)
+                    for pos in n.GetPixelPositions():
+                        if pos[0] < min_x_found:
+                            min_x_found = pos[0]
+                        if pos[1] < min_y_found:
+                            min_y_found = pos[0]
+                        if pos[0] > max_x_found:
+                            max_x_found = pos[0]
+                        if pos[0] > max_y_found:
+                            max_y_found = pos[0]
+                        
+                print("for node =", node, "FOUND CENTERED !!!", path)
+                centered.append({
+                    "position": {
+                        "min_x_found": min_x_found,
+                        "min_y_found": min_y_found,
+                        "max_x_found": max_x_found,
+                        "max_y_found": max_y_found,
+                    },
+                    "nodes": path
+                })
+
+        for center in centered:
+            all_node_found = [] 
+            for node in self.nodes:
+                if node in center['nodes']:
+                    continue
+                found = True
+                for pos in node.GetPixelPositions():
+                        if (pos[0] < center["position"]["min_x_found"] or pos[0] > center["position"]["max_x_found"] 
+                         or pos[1] < center["position"]["min_y_found"] or pos[1] > center["position"]["max_y_found"]):
+                            found = False
+                            break
+                if found:
+                    node.SetCenteredInNodes(True)
+                    all_node_found.append(node)
+                    print("success", node)   
+
+            # we connect all found node together 
+            for node_found in all_node_found:
+                for next_found in all_node_found:
+                    delta_x = abs(next_found.GetPixelPositions()[0][0] - node_found.GetPixelPositions()[0][0]) 
+                    delta_y = abs(next_found.GetPixelPositions()[0][1] - node_found.GetPixelPositions()[0][1])
+                    dist = sqrt(delta_x**2 + delta_y**2)
+                    if delta_x > 0 and delta_y > 0:
+                        node_found.AddAssociatedNode(next_found, "DIAGONALE", dist)   
+
+    
+    def CheckGroup(self, origin_node, associations, path, global_visited):
+        for association in associations:
+            node = association[0]
+            if node in path or node in global_visited:
+                continue
+            new_path = []
+            for i in path:
+                new_path.append(i)
+            if node == origin_node and len(new_path) > 1:
+                return (True, new_path)
+            elif node != origin_node:
+                new_path.append(node)
+            elif node == origin_node and len(new_path) <= 1:
+                continue
+            
+            next_associations = node.GetAssociatedNode()
+            result, found_path = self.CheckGroup(origin_node, next_associations, new_path, global_visited)
+            if result:
+                return (True, found_path)
+        return (False, None)
+
+
+            
 
 
     def GetNodePositions(self):
@@ -190,7 +287,7 @@ class Graph:
         for node in nodes:
             G.add_node(node, color=node.color, size=node.size)
 
-            for neighbor, direction in node.associated_nodes:
+            for neighbor, direction, dist in node.associated_nodes:
                 G.add_node(neighbor, color=neighbor.color, size=neighbor.size)
                 G.add_edge(node, neighbor, label=direction)
         
@@ -326,6 +423,29 @@ class Graph:
             "matches": match_list,
             "match_count": len(match_list),
         }
+    
+    @staticmethod
+    def CompareConnectionsBetweenGraphs(input_node, output_node):
+        if len(input_node.GetAssociatedNode()) == 0:
+            return False
+        for connection_input in input_node.GetAssociatedNode():
+            dir = connection_input[1] 
+            diff = connection_input[2]
+            size = connection_input[0].GetSize()
+            found = False
+            for connection_output in output_node.GetAssociatedNode():
+                # if true, the connected node is "probably" the same than input
+                if (connection_output[1] == dir and 
+                connection_output[0].GetSize() == size and 
+                connection_output[2] == diff):
+                    found = True
+                    break
+            if not found:
+                return False
+        return True
+        
+        
+
 
     
     @staticmethod

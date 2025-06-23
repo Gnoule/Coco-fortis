@@ -1,12 +1,11 @@
 <instance format="XCSP3" type="CSP">
   <variables>
-    <array id="x" size="[3]"> 0..9 </array>
+    <array id="nodex_active" size="[9]"> 0 1 </array>
   </variables>
   <constraints>
-    <allDifferent> x[] </allDifferent>
     <sum>
-      <list> x[] </list>
-      <condition> (eq,15) </condition>
+      <list> nodex_active[] </list>
+      <condition> (ge,1) </condition>
     </sum>
   </constraints>
 </instance>

@@ -27,6 +27,9 @@ def CreateCondition(all_constraint_if, node, graph):
             case ConstraintIfType.IF_SIZE:
                 if node.BiggerSize(all_constraint_if[constraint_if]) == False:
                     return False
+            case ConstraintIfType.IF_FORM_CONTAINED:
+                if node.GetCenteredInNodes() == False:
+                    return False
     return True
 
 
@@ -37,14 +40,14 @@ def Resolver(final_constraint, input_grid):
     
     grid = []
     if ConstraintType.GRID_SIZE in final_constraint:
-        size = final_constraint[ConstraintType.GRID_SIZE]['value'][0]
+        size = final_constraint[ConstraintType.GRID_SIZE]['value']
         for x in range (size):
             inter = []
             for y in range (size):
                 inter.append(0)
             grid.append(inter)
     else:
-        return
+        size = graph_input.GetGridSize()
         
 
     # TODO if grid is superior than original grid, replace old grid by new one
@@ -52,9 +55,9 @@ def Resolver(final_constraint, input_grid):
 
 
     if ConstraintType.NUMBER_NODES_OUTPUT in final_constraint:
-        nb_nodes = final_constraint[ConstraintType.NUMBER_NODES_OUTPUT]['value'][0]
+        nb_nodes = final_constraint[ConstraintType.NUMBER_NODES_OUTPUT]['value']
     else:
-        return
+        nb_nodes = 5
 
     # VARIABLES 
 
@@ -81,7 +84,6 @@ def Resolver(final_constraint, input_grid):
     #nodex_rot = VarArray(size=[node_size], dom=(0, 45, 90, 135))
     #nodex_extend_to = VarArray(size=[node_size], dom=range(node_size))
     
-
 
     satisfy(
         grid_size == size
@@ -113,17 +115,30 @@ def Resolver(final_constraint, input_grid):
             second_node = pos_found[j]
             for x_first, y_first in first_node:
                 for x_second, y_second in second_node:
-                    satisfy(
-                        If(nodex_active[i] == 1, Then=(x_first != x_second) & (y_first != y_second))
-                        # ~ (nodex_active[i] == 1) | (
-                        #     (x_first != x_second) & (y_first != y_second)
-                        # )
+                   satisfy(
+                       If(
+                            (nodex_active[i] == 1) & (nodex_active[j] == 1),
+                            Then=(x_first != x_second) | (y_first != y_second)
+                        )
                     )
 
     # BASIC CONSTRAINT: number of nodes in output
     satisfy(
-        Sum(nodex_active) == nb_nodes
+        Sum(nodex_active) >= 1,
+        Sum(nodex_offset_x) >= -original_size*node_size,
+        Sum(nodex_offset_y) >= -original_size*node_size,
+        *[nodex_color[i] >= 1 for i in range(node_size)]
     )
+
+    
+    if nb_nodes != None:
+        satisfy(
+            Sum(nodex_active) == nb_nodes
+        )
+    else:
+        maximize(
+            Sum(nodex_active)
+        )
 
     # COMPLEX CONSTRAINT: Constraints found
 
@@ -140,6 +155,11 @@ def Resolver(final_constraint, input_grid):
                     if CreateCondition(final_constraint[constraint]['constraints_if'], nodes[i], graph_input):
                         satisfy (
                             If(nodex_active[i] == 1, Then=(nodex_color[i] == final_constraint[constraint]['value']))
+                        ) 
+                case ConstraintType.COLOR_INPUT_EQUAL_OUTPUT:
+                    if CreateCondition(final_constraint[constraint]['constraints_if'], nodes[i], graph_input):
+                        satisfy (
+                            If(nodex_active[i] == 1, Then=(nodex_color[i] == nodes[i].GetColor()))
                         ) 
                 case ConstraintType.CENTER_NODE:
                     if CreateCondition(final_constraint[constraint]['constraints_if'], nodes[i], graph_input):
@@ -164,12 +184,34 @@ def Resolver(final_constraint, input_grid):
                                 Then=(abs(dist_left - dist_right) <= 1) & (abs(dist_up - dist_down) <= 1)
                             )
                         )
+                case ConstraintType.KEEP_CONNECTION_TO_NODES:
+                    if CreateCondition(final_constraint[constraint]['constraints_if'], nodes[i], graph_input):
+                            associated = nodes[i].GetAssociatedNode()
+                            (x_i, y_i) = pos_found[i][0]
+                            for current_associated in associated:
+                                index_associated = nodes.index(current_associated[0])
+                                (x_j, y_j) = pos_found[index_associated][0]
 
+                                # dir = current_associated[1]
+                                # dist = current_associated[2]
+                                
+                                delta_x = nodes[i].GetPixelPositions()[0][0] - current_associated[0].GetPixelPositions()[0][0]
+                                delta_y = nodes[i].GetPixelPositions()[0][1] - current_associated[0].GetPixelPositions()[0][1]
+                                print("for node = ", i, "node voisin ")
+                                
+                                satisfy(
+                                    If((nodex_active[i] == 1) & (nodex_active[index_associated] == 1),
+                                        Then=(
+                                            (x_i == x_j + delta_x) &
+                                            (y_i == y_j + delta_y)
+                                        )
+                                    )
+                                )
 
     compile()
 
     
-    if solve(solver="ace") is SAT:
+    if solve(solver="choco"): #is SAT:
 
         print("nodex_offset_x = ", values(nodex_offset_x))
         print("nodex_offset_y = ", values(nodex_offset_y))

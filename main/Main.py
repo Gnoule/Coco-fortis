@@ -7,8 +7,9 @@ import copy
 
 example = ['39a8645d','28bf18c6','27a28665','25d487eb','08ed6ac7','7f4411dc']
 
+#3de23699
 data = None
-with open('training/39a8645d.json') as json_file:
+with open('training/8a004b2b.json') as json_file:
     data = json.load(json_file)
 
 
@@ -127,6 +128,10 @@ training_examples = data['train']
 def Finder(examples, evaluation):
     constraints_brut = []
     startTime = datetime.now()
+    # input = Graph(examples[3]['input'])
+    # FindConstraintFromExample(examples[3]['input'], examples[3]['output'])
+    # input.ShowGraph()
+    # input.ShowGrid()
     for example in examples:
         constraints_brut.append(FindConstraintFromExample(example['input'], example['output']))
     final_constraint = FilterConstraint(constraints_brut)
@@ -144,3 +149,15 @@ def Finder(examples, evaluation):
 
 
 Finder(data['train'], data['test'])
+
+# input_example2 = [
+#     [0, 2, 0, 0, 0, 0, 0],
+#     [2, 2, 2, 0, 0, 0, 0],
+#     [0, 2, 2, 0, 0, 2, 0],
+#     [0, 0, 0, 0, 2, 2, 2],
+#     [0, 0, 0, 0, 0, 2, 0],
+#     [0, 1, 0, 0, 0, 0, 0],
+#     [0, 0, 0, 0, 0, 0, 0],
+# ]
+# g = Graph(input_example2)
+# g.ShowGraph()
