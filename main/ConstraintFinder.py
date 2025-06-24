@@ -95,43 +95,33 @@ def FindConstraintFromExample(training_input, training_output, want_time_log=Fal
             continue
 
 
-        # result_compare_sequences = Graph.CompareNodeSequenceBetweenGraphs()
-        # if result_compare_sequences['match_count'] > 0:
-        #     current_if_types = GetConstraintIfTypes(input_node, graph_input)
-        #     for current in current_if_types:
-        #         type = current['type']
-        #         value = current['value']
-        #         AddConstraints(ConstraintType.FORM_INPUT_EQUAL_FORM_OUTPUT, None, type, value)
-        #         AddConstraints(ConstraintType.FORM_OUTPUT_COLOR, input_node.GetColor(), type, value)
-        #         AddConstraints(ConstraintType.NODE_X_FIXED, None, type, value)
-        #         AddConstraints(ConstraintType.NODE_Y_FIXED, None,type, value)
-
-           
+        pattern_result = Graph.FindPatternOneNode(input_node, graph_input)       
 
         #     continue
+        # print("----------------------ZAZA--------------------------------")
+        involved_inputs, merged_node = Graph.CompareNodeExtended(graph_input, graph_output, input_node)
+        if involved_inputs and merged_node:
+            # print("----------------------ZOUZOU--------------------------------")
+            # Check if all involved input nodes have not moved (i.e., they still exist fully in the merged node)
+            fixed = True
+            for n in involved_inputs:
+                # Each node must have all its original pixels present in the merged output node
+                node_pixels = set(n.GetPixelPositions())
+                merged_pixels = set(merged_node.GetPixelPositions())
 
-        # involved_inputs, merged_node = Graph.CompareNodeExtended(graph_input, graph_output, input_node)
-        # if involved_inputs and merged_node:
-        #     # Check if all involved input nodes have not moved (i.e., they still exist fully in the merged node)
-        #     fixed = True
-        #     for n in involved_inputs:
-        #         # Each node must have all its original pixels present in the merged output node
-        #         node_pixels = set(n.GetPixelPositions())
-        #         merged_pixels = set(merged_node.GetPixelPositions())
+                # Verify that all pixels from the input node are still present in the merged node (i.e., no displacement)
+                if not node_pixels.issubset(merged_pixels):
+                    fixed = False
+                    break
 
-        #         # Verify that all pixels from the input node are still present in the merged node (i.e., no displacement)
-        #         if not node_pixels.issubset(merged_pixels):
-        #             fixed = False
-        #             break
+            if fixed:
+                # If the nodes are fixed in position, register a constraint indicating they are merged
+                for current in GetConstraintIfTypes(input_node, graph_input):
+                    type = current['type']
+                    value = current['value']
+                    AddConstraints(constraints_found, ConstraintType.EXTEND_TO_NODE, None, type, value)
 
-        #     if fixed:
-        #         # If the nodes are fixed in position, register a constraint indicating they are merged
-        #         for current in GetConstraintIfTypes(input_node, graph_input):
-        #             type = current['type']
-        #             value = current['value']
-        #             AddConstraints(constraints_found, ConstraintType.EXTEND_TO_NODE, None, type, value)
-
-        #     continue
+            continue
 
 
 

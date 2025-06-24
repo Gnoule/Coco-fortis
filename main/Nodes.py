@@ -31,6 +31,9 @@ class Node:
     
     def GetPixelPositions(self):
         return self.pixel_positions
+    
+    def GetPixelColor(self):
+        return self.pixel_colors
 
     def SetPixelPositions(self, new_pos):
         self.pixel_positions = new_pos
@@ -67,6 +70,12 @@ class Node:
             return self.pixel_colors[self.pixel_positions[0]]
         return self.color
     
+    def GetAllColor(self):
+        if self.color is not None:
+            return [self.color]
+        return list(set(self.pixel_colors.values()))
+
+    
     # TODO
     def SetColor(self, new_color):
         pass
@@ -84,6 +93,7 @@ class Node:
         if len(self.directly_connected_nodes) > 0:
             return True
         return False 
+
 
     # function to get the min pos and max pos (on X and Y)
     #return : {max_x:val, max_y:val, min_x:val, min_y:val}

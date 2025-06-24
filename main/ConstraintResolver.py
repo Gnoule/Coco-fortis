@@ -10,7 +10,8 @@ from Graph import Graph
 # solvers_path = os.path.join(os.path.dirname(__file__), "solvers")
 # print("Dossier des solveurs PyCSP3 :", solvers_path)
 # print("Contenu :", os.listdir(solvers_path))
-# os.environ["PYCSP3_SOLVERS"] = f"ace=java -jar C:/Users/mathe/AppData/Local/Programs/Python/Python313/Lib/site-packages/pycsp3/solvers/ace/ACE-2.3.jar"
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+# os.environ["PYCSP3_SOLVERS"] = "ace=java -jar C:/Users/mathe/OneDrive/Bureau/LIRMM/Coco-fortis/venv313/Lib/site-packages/pycsp3/solvers/ace/ACE-2.5.jar"
 
 
 
@@ -166,10 +167,13 @@ def Resolver(final_constraint, input_grid):
                         )
 
 
-    compile()
+    # compile()
 
-    
-    if solve(solver="CHOCO") is SAT:
+
+
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    if solve(solver="ace") is SAT:
+        print("----------------------On solve--------------------------------")
 
         print("nodex_offset_x = ", values(nodex_offset_x))
         print("nodex_offset_y = ", values(nodex_offset_y))

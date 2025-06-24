@@ -14,7 +14,7 @@ class Graph:
         self.nodes = []
         self.grid = grid
         # first, we create the nodes (by giving the type of graph construction)
-        self.CreateNode(grid, 'COLOR')
+        self.CreateNode(grid, 'NEIGHBOR')
         #then, we create the edges of the graph
         self.CreateEdges(grid)
         # print(self.HasDuplicateShapes())
@@ -255,7 +255,7 @@ class Graph:
             grouped_nodes[key].append(node)
 
         # Keep only groups with more than one node
-        grouped_nodes = {k: v for k, v in grouped_nodes.items() if len(v) > 1}
+        # grouped_nodes = {k: v for k, v in grouped_nodes.items() if len(v) > 1}
 
         # Sort by color (as string) and then by size
         sorted_keys = sorted(grouped_nodes.keys(), key=lambda k: (str(k[0]), k[1]))
@@ -301,6 +301,7 @@ class Graph:
         if dist_left == dist_right and dist_up == dist_down:
             return True
         return False
+        
 
 
 
@@ -344,14 +345,100 @@ class Graph:
                 break
 
         return first_group
-
     
     @staticmethod
-    def FindPattern(start_node, graph_instance):
-        # Access all nodes via the instance method
-        sorted_nodes = graph_instance.SortNodesByColorAndSize()
-        work_section = Graph.ExtractFirstRepeatedGroup(sorted_nodes)
+    def FindMatchingNodes(start_node, graph_instance):
+        matching_nodes = []
+        start_colors = set(start_node.GetAllColor())
 
+        for node in graph_instance.GetNodes():
+            if node is start_node:
+                continue
+
+            node_colors = set(node.GetAllColor())
+
+            if node.GetSize() > 1 and start_colors.intersection(node_colors):
+                matching_nodes.append(node)
+
+        return matching_nodes
+    
+    @staticmethod
+    def get_node_by_position(position, nodes):
+        for node in nodes:
+            if position in node.GetPixelPositions():
+                return node
+        return None
+    
+
+    @staticmethod
+    def findPattern(start_node, graph_instance):
+
+        print("--------------start of findPattern--------------")
+
+        if not start_node:
+            raise ValueError("Need a node to start")
+        
+        work_node = [start_node] + Graph.FindMatchingNodes(start_node, graph_instance)
+
+        directions = {
+            "UP": (0, -1),
+            "DOWN": (0, 1),
+            "LEFT": (-1, 0),
+            "RIGHT": (1, 0),
+        }
+
+        taboo = set()
+        used_nodes = set()
+        result = []
+
+        n1 = work_node[0]
+        pos1_position = n1.GetPixelPositions()[0]
+        pos1_color = n1.GetPixelColor()[pos1_position]
+        print("color", pos1_color, "position", pos1_position)
+
+        for i in range (len(work_node)-1):
+            for j in range(work_node[i+1].GetSize()):
+                n2 = work_node[i+1]
+                pos2_position = n2.GetPixelPositions()[j]
+                pos2_color = n2.GetPixelColor()[pos2_position]
+                # print("couleur de la positon2", pos2_color, "Emplacement de la position2", pos2_position)
+                if pos1_color == pos2_color:
+                    for _, (dx, dy) in directions.items():
+                        neighbor_pos1 = (pos1_position[0] + dx, pos1_position[1] + dy)
+                        neighbor_pos2 = (pos2_position[0] + dx, pos2_position[1] + dy)
+                        if (neighbor_pos1, neighbor_pos2) in taboo or (neighbor_pos2, neighbor_pos1) in taboo:
+                            continue    
+
+                        node_voisin_1 = Graph.get_node_by_position(neighbor_pos1, work_node)
+                        node_voisin_2 = Graph.get_node_by_position(neighbor_pos2, work_node)
+
+                        if node_voisin_1 and node_voisin_2:
+
+                            node_voisin1_color = node_voisin_1.GetPixelColor()[neighbor_pos1]
+                            node_voisin2_color = node_voisin_2.GetPixelColor()[neighbor_pos2]
+
+                            if node_voisin1_color == node_voisin2_color:
+                                if n1 in used_nodes or n2 in used_nodes:
+                                    continue
+                                result.append([[n1, neighbor_pos1], [n2, neighbor_pos2]])
+                                used_nodes.update([n1, n2])
+                            else:
+                                taboo.add((neighbor_pos1, neighbor_pos2))
+                        else:
+                            taboo.add((neighbor_pos1, neighbor_pos2))
+            while True:
+                break
+
+        Graph.pretty_print_result(result)
+        return False
+    
+    @staticmethod
+    def FindPatternOneNode(start_node, graph_instance):
+        if not start_node:
+            raise ValueError("Need a node to start")
+
+        work_section = [start_node] + Graph.FindMatchingNodes(start_node, graph_instance)
+        print(work_section)
         pos_to_node = {}
         for node in graph_instance.nodes:
             for pos in node.GetPixelPositions():
@@ -565,18 +652,6 @@ class Graph:
                     return involved_inputs, node_out  # Return all involved nodes and merged output node
 
         return None, None
-    
-
-
-    
-
-
-
-
-
-
-
-
 
     #### FUNCTION POUR MODIFIER LE GRAPH APRES COUP ####
 

@@ -4,11 +4,20 @@ from ConstraintResolver import *
 from ResolverFromCP import *
 from datetime import datetime
 import copy
+import os
+os.environ["PYCSP3_SOLVERS"] = "ace=java -jar C:/Users/mathe/OneDrive/Bureau/LIRMM/Coco-fortis/venv313/Lib/site-packages/pycsp3/solvers/ace/ACE-2.5.jar"
+
+
 
 example = ['39a8645d','28bf18c6','27a28665','25d487eb','08ed6ac7','7f4411dc']
 
 data = None
-with open('training/39a8645d.json') as json_file:
+
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+json_path = os.path.join(project_root, "training", "7f4411dc.json")
+
+with open(json_path) as json_file:
     data = json.load(json_file)
 
 
