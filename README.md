@@ -1,4 +1,4 @@
-# Coco-fortis
+# Coco-fortis - Constraint Learning from Abstraction and Reasoning Corpus (ARC)
 
 Ce projet vise à **apprendre automatiquement des contraintes logiques** à partir d’exemples d’entrées/sorties visuelles, dans le style des tâches de l’**Abstraction and Reasoning Corpus (ARC)**. Il s’appuie sur une **représentation par graphes** et une **résolution via CSP (Problème de Satisfaction de Contraintes)**.
 
