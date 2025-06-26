@@ -45,8 +45,8 @@ Dans `Main.py`, le script :
 ## Installation
 
 ```bash
-git clone https://github.com/ton-utilisateur/ton-projet.git
-cd ton-projet
+git clone https://github.com/Gnoule/Coco-fortis.git
+cd Coco-fortis
 
 # Créer un environnement
 python -m venv venv
