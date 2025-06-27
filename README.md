@@ -79,4 +79,4 @@ Le système peut détecter plusieurs types de contraintes symboliques :
 - François Chollet, *The Measure of Intelligence (2019)* — [PDF](https://arxiv.org/pdf/1911.01547)
 - [ARGA: Abductive Reasoning Graph Abstraction for Solving ARC Tasks](https://github.com/khalil-research/ARGA-AAAI23) — Implémentation du papier ARGA (AAAI 2023)
 
-Projet développé par Mathéo et Hugo dans le cadre d’un stage en recherche d'un durée de un mois l'apprentissage de contraintes logiques.
+Projet développé par Mathéo et Hugo dans le cadre d’un stage en recherche d'un durée de un mois sur l'apprentissage de contraintes logiques.
