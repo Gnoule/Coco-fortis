@@ -25,7 +25,7 @@ Le but est de généraliser à partir de quelques exemples visuels (images) en e
   - `Main.py` : script principal de test.
 
 ### Dépendances
-- `pycsp3` : solveur de contraintes (ACE).
+- `pycsp3` : solveur de contraintes (CHOCO).
 - `networkx`, `matplotlib`, `numpy` : visualisation et traitement.
 - Python 3.10+ conseillé.
 
@@ -54,3 +54,29 @@ source venv/bin/activate  # ou venv\Scripts\activate sur Windows
 
 # Installer les dépendances
 pip install -r requirements.txt
+```
+
+## Contraintes extraites automatiquement
+
+Le système peut détecter plusieurs types de contraintes symboliques :
+
+| Contrainte                       | Description                                                             |
+|----------------------------------|-------------------------------------------------------------------------|
+| `GRID_SIZE`                      | Taille de la grille de sortie                                           |
+| `FORM_INPUT_EQUAL_FORM_OUTPUT`   | Conservation d’une forme présente dans l’entrée                         |
+| `FORM_OUTPUT_COLOR`              | Couleur attendue pour une forme donnée                                  |
+| `NUMBER_NODES_OUTPUT`            | Nombre total de formes attendues en sortie                              |
+| `NODE_X_FIXED` / `NODE_Y_FIXED`  | Blocage du déplacement d’un objet selon l’axe **X** ou **Y**            |
+| `CENTER_NODE`                    | Imposition d’un positionnement central                                  |
+| `KEEP_NODE`                      | Obligation de conserver certaines structures                            |
+| `EXTEND_TO_NODE`                 | Extension d’une forme vers une autre forme voisine                      |
+
+## Sources
+
+- François Chollet, [Abstraction and Reasoning Corpus (ARC)](https://github.com/fchollet/ARC)
+- [PyCSP3](https://pycsp.org) — Langage de modélisation pour les problèmes de satisfaction de contraintes
+- Guernout et al., *A Neuro-Symbolic Approach for Program Synthesis from Visual Examples (2022)* — [PDF](https://arxiv.org/pdf/2210.09880)
+- François Chollet, *The Measure of Intelligence (2019)* — [PDF](https://arxiv.org/pdf/1911.01547)
+- [ARGA: Abductive Reasoning Graph Abstraction for Solving ARC Tasks](https://github.com/khalil-research/ARGA-AAAI23) — Implémentation du papier ARGA (AAAI 2023)
+
+Projet développé par Mathéo et Hugo dans le cadre d’un stage en recherche d'un durée de un mois l'apprentissage de contraintes logiques.
