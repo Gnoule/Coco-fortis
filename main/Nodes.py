@@ -21,18 +21,26 @@ class Node:
 
     # connection_type = HORIZONTAL OR VERTICAL
     # diff = difference between this node and other node
-    def AddAssociatedNode(self, new_node, connection_type, diff):
+    def AddAssociatedNode(self, original_node_index, new_node, connection_type, diff):
         i = 0
+        if diff[0] == 0:
+            absDiff = diff[1]
+        elif diff[1] == 0:
+            absDiff = diff[0]
+        else:
+            absDiff = math.sqrt(diff[0]**2 + diff[1]**2)
+            
+
         for val in self.associated_nodes:
             if new_node == val[0]:
-                if abs(diff) <= abs(val[2]):
+                if abs(absDiff) <= abs(val[2]):
                     del self.associated_nodes[i]
                     break 
                 else:
                     return
             i += 1
-        self.associated_nodes.append([new_node, connection_type, diff])
-        if abs(diff) <= 1:
+        self.associated_nodes.append([original_node_index, new_node, connection_type, diff])
+        if abs(absDiff) <= 1:
             self.directly_connected_nodes.append(new_node)
 
     def GetAssociatedNode(self):

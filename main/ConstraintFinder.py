@@ -31,8 +31,8 @@ class ConstraintIfType(Enum):
     IF_FORM_CONTAINED = 8       # if node is contained in other nodes
 
 constraint_everywhere = [ConstraintType.COLOR_INPUT_EQUAL_OUTPUT, ConstraintType.CENTER_NODE]
-
-
+constrait_equals = [ConstraintType.GRID_SIZE, ConstraintType.NUMBER_NODES_OUTPUT]
+constraints_ifs_everywhere = []
 class Constraint:
     def __init__(self, type, value, type_if):
         self.constraint_type = type
@@ -74,34 +74,30 @@ def FindConstraintFromExample(training_input, training_output, want_time_log=Fal
 
         result_compare_nodes = Graph.CompareNodeBetweenGraphs(input_node, graph_output)
         if result_compare_nodes['match_count'] > 0:
-            output_node = result_compare_nodes['matches'][0][0]
-            current_if_types = GetConstraintIfTypes(input_node, graph_input)
-            for current in current_if_types:
-                type = current['type']
-                value = current['value']
-                AddConstraints(constraints_found, ConstraintType.FORM_INPUT_EQUAL_FORM_OUTPUT, None, type, value)
-                AddConstraints(constraints_found, ConstraintType.FORM_OUTPUT_COLOR, output_node.GetColor(), type, value)
-                if input_node.GetColor() == output_node.GetColor():
-                    AddConstraints(constraints_found, ConstraintType.COLOR_INPUT_EQUAL_OUTPUT, None, type, value)
-                
+            for output_node_raw in result_compare_nodes['matches']:
+                output_node = output_node_raw[0]
+                current_if_types = GetConstraintIfTypes(input_node, graph_input)
+                for current in current_if_types:
+                    type = current['type']
+                    value = current['value']
+                    AddConstraints(constraints_found, ConstraintType.FORM_INPUT_EQUAL_FORM_OUTPUT, None, type, value)
+                    AddConstraints(constraints_found, ConstraintType.FORM_OUTPUT_COLOR, output_node.GetColor(), type, value)
+                    if input_node.GetColor() == output_node.GetColor():
+                        AddConstraints(constraints_found, ConstraintType.COLOR_INPUT_EQUAL_OUTPUT, None, type, value)
+                    
 
 
-                compare_pos = Graph.CompareTwoNodesPosition(graph_input, graph_output, input_node, output_node)
-                if compare_pos[0] == 0:
-                    AddConstraints(constraints_found, ConstraintType.NODE_X_FIXED, None, type, value)
-                if compare_pos[1] == 0:
-                    AddConstraints(constraints_found, ConstraintType.NODE_Y_FIXED, None,type, value)
+                    compare_pos = Graph.CompareTwoNodesPosition(graph_input, graph_output, input_node, output_node)
+                    if compare_pos[0] == 0:
+                        AddConstraints(constraints_found, ConstraintType.NODE_X_FIXED, None, type, value)
+                    if compare_pos[1] == 0:
+                        AddConstraints(constraints_found, ConstraintType.NODE_Y_FIXED, None,type, value)
 
-                if graph_output.IsNodeInCenter(output_node):
-                    AddConstraints(constraints_found, ConstraintType.CENTER_NODE, None, type, value)
-                
-                if Graph.CompareConnectionsBetweenGraphs(input_node=input_node, output_node=output_node):
-                    AddConstraints(constraints_found, ConstraintType.KEEP_CONNECTION_TO_NODES, None, type, value)
-            
-            # constraints_found.append(Constraint(ConstraintType.FORM_INPUT_EQUAL_FORM_OUTPUT, None, current_if_types))
-            # constraints_found.append(Constraint(ConstraintType.FORM_OUTPUT_COLOR, input_node.GetColor(), current_if_types))
-            # constraints_found.append(Constraint(ConstraintType.NODE_X_FIXED, None, current_if_types))
-            # constraints_found.append(Constraint(ConstraintType.NODE_Y_FIXED, None, current_if_types))
+                    if graph_output.IsNodeInCenter(output_node):
+                        AddConstraints(constraints_found, ConstraintType.CENTER_NODE, None, type, value)
+                    
+                    if Graph.CompareConnectionsBetweenGraphs(input_node=input_node, output_node=output_node, output_graph=graph_output):
+                        AddConstraints(constraints_found, ConstraintType.KEEP_CONNECTION_TO_NODES, None, type, value)
             
             continue
 
@@ -151,16 +147,20 @@ def FindConstraintFromExample(training_input, training_output, want_time_log=Fal
 
     print("constraints_found = ", constraints_found)
     final_constraints = FilterConstraintsIfTypes(constraints_found)
-    print(final_constraints)
+    print("final constraint = ", final_constraints)
     return final_constraints
 
 
         
-
+# constraint1 -> (value1->constraint_if1->[value]), value2->constraint_if1->[value]
 def AddConstraints(constraints_found, constraint_type, constraint_value, constraint_if_types, constraint_if_types_value):
-    if constraint_type not in constraints_found:
-       constraints_found[constraint_type] = {'value': constraint_value, 'constraints_if': {}}
-    constraints_found[constraint_type]['constraints_if'][constraint_if_types] = constraint_if_types_value
+    if constraint_type not in constraints_found or constraint_value not in constraints_found[constraint_type]:
+       constraints_found[constraint_type] = {constraint_value: {}}
+    if constraint_if_types not in constraints_found[constraint_type][constraint_value]:
+        constraints_found[constraint_type][constraint_value][constraint_if_types] = []
+    constraints_found[constraint_type][constraint_value][constraint_if_types].append(constraint_if_types_value)
+    #constraints_found[constraint_type]['constraints_if'][constraint_if_types].append(constraint_if_types_value)
+    #constraints_found[constraint_type]['value'].append(constraint_value)
 
 
 
@@ -203,23 +203,46 @@ def FilterConstraintsIfTypes(constraints_found):
     for index_constraint in constraints_found:
         constraint = constraints_found[index_constraint]
         constraint_type_if_visited = []
-        for constraint_type_if in  constraint['constraints_if']:
-            if constraint_type_if in constraint_type_if_visited:
+
+        # check if value same:
+        # if not all(x==constraint['value'][0] for x in constraint['value']):
+        #     continue
+
+        for contraint_value in constraint:
+            for constraint_type_if in constraint[contraint_value]:
+                #check if value same
+                if not all(x==constraint[contraint_value][constraint_type_if][0] for x in constraint[contraint_value][constraint_type_if]):
                     continue
-            values_possible = []
-            for constraint_type_search in constraint['constraints_if']:
-                if constraint_type_search in constraint_type_if_visited:
-                    continue
-                #if type_if are the same
-                if constraint_type_if == constraint_type_search:
-                    constraint_type_if_visited.append(constraint_type_search)
-                    # if not added before
-                    if constraint['constraints_if'][constraint_type_search] not in values_possible:
-                        values_possible.append(constraint['constraints_if'][constraint_type_search])
-            if index_constraint not in new_constraint_found:
-                new_constraint_found[index_constraint] = {'value': constraint['value'], 'constraints_if': {}}
-            new_constraint_found[index_constraint]['constraints_if'][constraint_type_if] = values_possible
+                if index_constraint not in new_constraint_found:
+                    new_constraint_found[index_constraint] = {contraint_value:{}}
+                # if constraint_type_if not in new_constraint_found[index_constraint][contraint_value]:
+                #     constraints_found[index_constraint][contraint_value][constraint_type_if] = 
+                new_constraint_found[index_constraint][contraint_value][constraint_type_if] = constraint[contraint_value][constraint_type_if][0]
     return new_constraint_found
+                
+
+
+    #         for value_constraint_type_if_visited in constraint_type_if_visited:
+    #             if set(constraint_type_if) == set(value_constraint_type_if_visited): 
+    #                 continue
+                
+    #         values_possible = []
+    #         for constraint_type_search in constraint['constraints_if']:
+    #             # check if set is not the same
+    #             for value_constraint_type_if_visited in constraint_type_if_visited:
+    #                 if set(constraint_type_search) == set(value_constraint_type_if_visited):
+    #                     continue
+
+    #             #if type_if are the same (we check if set is same)
+    #             if constraint_type_if == constraint_type_search:
+    #                 constraint_type_if_visited.append(constraint_type_search)
+    #                 # if not added before
+    #                 if constraint['constraints_if'][constraint_type_search] not in values_possible:
+    #                     values_possible.append(constraint['constraints_if'][constraint_type_search][0])
+    #         if index_constraint not in new_constraint_found:
+    #             new_constraint_found[index_constraint] = {'value': constraint['value'], 'constraints_if': {}}
+    #         new_constraint_found[index_constraint]['constraints_if'][constraint_type_if] = values_possible
+    # return new_constraint_found
 
 
 
@@ -234,16 +257,19 @@ def FilterConstraint(examples_constraints):
     constraint_visited = []
     # test all found examples
     for index_constraints_found in range(len(examples_constraints)): 
+        constraint_is_deleted = False
         current_constraints_found = examples_constraints[index_constraints_found]
         #test all constraints of said example
         for name_constraint in current_constraints_found:
             if name_constraint in constraint_visited or name_constraint in constraint_to_delete:
                 continue
+            if constraint_is_deleted:
+                break
             current_constraint = current_constraints_found[name_constraint]
             constraint_visited.append(name_constraint)
 
-            constraint_to_add[name_constraint] = {'value': [], 'constraints_if': {}}
-            constraint_to_add[name_constraint]['value'] = current_constraint['value']
+            constraint_to_add[name_constraint] = {}
+            #constraint_to_add[name_constraint]['value'] = current_constraint['value']
 
             constraint_if_deleted[name_constraint] = []
             
@@ -252,22 +278,84 @@ def FilterConstraint(examples_constraints):
             for name_const in constraint_everywhere:
                 if name_const not in current_constraints_found and name_const not in constraint_to_delete:
                     constraint_to_delete.append(name_const)
+                    del constraint_to_add[name_constraint]
+                    constraint_is_deleted = True
+                    break
             
             # check n+1 example
             # we will add values, and constraints if value as well
             for index_constraints_found_tested in range(index_constraints_found+1, len(examples_constraints)):
+                
+                if constraint_is_deleted:
+                    break
+                
                 current_constraint_found_tested = examples_constraints[index_constraints_found_tested]
                 
                 # found constraint in other example
-                if name_constraint == ConstraintType.COLOR_INPUT_EQUAL_OUTPUT:
+                if name_constraint == ConstraintType.FORM_INPUT_EQUAL_FORM_OUTPUT:
                     b = 3
                 if name_constraint in current_constraint_found_tested:
                     current_constraint_tested = current_constraint_found_tested[name_constraint]
 
                     # first: if value for the constraint is not the same, we add it
-                    if current_constraint_tested['value'] != constraint_to_add[name_constraint]['value']:
-                        del constraint_to_add[name_constraint]
-                        break
+                    for current_constraint_value in current_constraint:
+                        
+                        #we enter tryhard mode
+                        if current_constraint_value in current_constraint_tested:
+                            
+                            # for each constraints if of current constraits (of current example)
+                            for current_constraint_if in current_constraint[current_constraint_value]:
+                                
+                                # if other constraint (on other example) as same constraint if as this one
+                                if current_constraint_if in current_constraint_tested[current_constraint_value]:
+
+                                    # if constraints if values of both are same (not contradicting) so we add it to the official values (+check before if already in list so no double values + if not deleted on previous constraint search)
+                                    if current_constraint[current_constraint_value][current_constraint_if] == current_constraint_tested[current_constraint_value][current_constraint_if]:
+                                        if current_constraint_if not in constraint_if_deleted[name_constraint]:
+                                            if current_constraint_value not in constraint_to_add[name_constraint]:
+                                                constraint_to_add[name_constraint][current_constraint_value] = {}
+                                            constraint_to_add[name_constraint][current_constraint_value][current_constraint_if] = current_constraint[current_constraint_value][current_constraint_if]
+                                    # else, constraints are contradicting, if already in the liste, we delete it
+                                    else:
+
+                                        # we append this to never use for this constraint the constraint_if
+                                        if current_constraint_if not in constraint_if_deleted[name_constraint]:
+                                            constraint_if_deleted[name_constraint].append(current_constraint_if)
+                                        
+                                        if current_constraint_value in constraint_to_add[name_constraint] and current_constraint_if in constraint_to_add[name_constraint][current_constraint_value]:
+                                            del constraint_to_add[name_constraint][current_constraint_value][current_constraint_if]
+                                else:
+                                    # if not found but in deleted, we dont add it
+                                    if current_constraint_if in constraint_if_deleted[name_constraint]:
+                                            continue
+                                    
+                                    if current_constraint_value not in constraint_to_add[name_constraint]:
+                                        constraint_to_add[name_constraint][current_constraint_value] = {}
+                                    # if the current_if was already in constraint to add, it means that in this new constraint it was not here anymore
+                                    # so we delete it (because it wasnt found in all constraint)
+                                    if current_constraint_if in constraint_to_add[name_constraint][current_constraint_value]:
+                                        del constraint_to_add[name_constraint][current_constraint_value][current_constraint_if] 
+                                        constraint_if_deleted[name_constraint].append(current_constraint_if)
+                                    # if we find a new constraint if, we add it (because never found before and why not)
+                                    # else:
+                                    #     constraint_to_add[name_constraint][current_constraint_value][current_constraint_if] = current_constraint[current_constraint_value][current_constraint_if]
+                                #else:
+                                #    constraint_to_add[name_constraint][current_constraint_value][current_constraint_if] = current_constraint[current_constraint_value][current_constraint_if]
+                        
+                        # simply adding the constraint value + constraints ifs
+                        else:
+                            if name_constraint in constrait_equals:
+                                constraint_to_delete.append(name_const)
+                                del constraint_to_add[name_constraint]
+                                constraint_is_deleted = True
+                                break
+                            # if current_constraint_value not in constraint_to_add[name_constraint]:
+                            #     constraint_to_add[name_constraint][current_constraint_value] = {}
+                            # constraint_to_add[name_constraint][current_constraint_value] = current_constraint_tested[current_constraint_value]
+                    # if current_constraint_tested != constraint_to_add[name_constraint]['value']:
+                    # if current_constraint_tested['value'] != constraint_to_add[name_constraint]['value']:
+                    #     del constraint_to_add[name_constraint]
+                    #     break
                         # constraint_to_add[name_constraint]['value'].append(current_constraint_tested['value'])  #TODO
 
 
@@ -275,25 +363,7 @@ def FilterConstraint(examples_constraints):
                     # if yes, check if the value changes. if yes, we erase this constraints_if (not the same between nodes so not important)
                     # if no, we can keep it
 
-                    # for each constraints if of current constraits (of current example)
-                    for current_constraint_if in current_constraint['constraints_if']:
-                        # if other constraint (on other example) as same constraint if as this one
-                        if current_constraint_if in current_constraint_tested['constraints_if']:
-
-                            # if constraints if values of both are same (not contradicting) so we add it to the official values (+check before if already in list so no double values + if not deleted on previous constraint search)
-                            if set(current_constraint['constraints_if'][current_constraint_if]) == set(current_constraint_tested['constraints_if'][current_constraint_if]):
-                                if current_constraint_if not in constraint_if_deleted[name_constraint] and current_constraint_if not in constraint_to_add[name_constraint]['constraints_if']:
-                                    constraint_to_add[name_constraint]['constraints_if'][current_constraint_if] = current_constraint['constraints_if'][current_constraint_if][0]    # TODO [0] not sure
-                            # else, constraints are contradicting, if already in the liste, we delete it
-                            else:
-
-                                # we append this to never use for this constraint the constraint_if
-                                constraint_if_deleted[name_constraint].append(current_constraint_if)
-                                
-                                if current_constraint_if in constraint_to_add[name_constraint]['constraints_if']:
-                                    del constraint_to_add[name_constraint]['constraints_if'][current_constraint_if]
-                        else:
-                            constraint_to_add[name_constraint]['constraints_if'][current_constraint_if] = current_constraint['constraints_if'][current_constraint_if][0]  # TODO [0] not sure
+                    
                 
                 # if name_constraint in constraint_everywhere, then we need that constraint is in all examples found
                 # if not, we delete it
@@ -304,3 +374,85 @@ def FilterConstraint(examples_constraints):
                     break
 
     return constraint_to_add                 
+
+
+
+
+
+# def FilterConstraint(examples_constraints):
+#     constraint_to_add = {}
+#     constraint_to_delete = []
+#     constraint_if_deleted = {}  # will be useful to avoid putting contraint_if already deleted 
+#     constraint_visited = []
+#     # test all found examples
+#     for index_constraints_found in range(len(examples_constraints)): 
+#         current_constraints_found = examples_constraints[index_constraints_found]
+#         #test all constraints of said example
+#         for name_constraint in current_constraints_found:
+#             if name_constraint in constraint_visited or name_constraint in constraint_to_delete:
+#                 continue
+#             current_constraint = current_constraints_found[name_constraint]
+#             constraint_visited.append(name_constraint)
+
+#             constraint_to_add[name_constraint] = {'value': [], 'constraints_if': {}}
+#             constraint_to_add[name_constraint]['value'] = current_constraint['value']
+
+#             constraint_if_deleted[name_constraint] = []
+            
+#             # check if for constraint that HAS to be in all examples, is not in the current
+#             # if no, then we delete this constraint
+#             for name_const in constraint_everywhere:
+#                 if name_const not in current_constraints_found and name_const not in constraint_to_delete:
+#                     constraint_to_delete.append(name_const)
+            
+#             # check n+1 example
+#             # we will add values, and constraints if value as well
+#             for index_constraints_found_tested in range(index_constraints_found+1, len(examples_constraints)):
+#                 current_constraint_found_tested = examples_constraints[index_constraints_found_tested]
+                
+#                 # found constraint in other example
+#                 if name_constraint == ConstraintType.COLOR_INPUT_EQUAL_OUTPUT:
+#                     b = 3
+#                 if name_constraint in current_constraint_found_tested:
+#                     current_constraint_tested = current_constraint_found_tested[name_constraint]
+
+#                     # first: if value for the constraint is not the same, we add it
+#                     if current_constraint_tested['value'] != constraint_to_add[name_constraint]['value']:
+#                         del constraint_to_add[name_constraint]
+#                         break
+#                         # constraint_to_add[name_constraint]['value'].append(current_constraint_tested['value'])  #TODO
+
+
+#                     # second: constraints_if, we check if there is same constraints_if
+#                     # if yes, check if the value changes. if yes, we erase this constraints_if (not the same between nodes so not important)
+#                     # if no, we can keep it
+
+#                     # for each constraints if of current constraits (of current example)
+#                     for current_constraint_if in current_constraint['constraints_if']:
+#                         # if other constraint (on other example) as same constraint if as this one
+#                         if current_constraint_if in current_constraint_tested['constraints_if']:
+
+#                             # if constraints if values of both are same (not contradicting) so we add it to the official values (+check before if already in list so no double values + if not deleted on previous constraint search)
+#                             if set(current_constraint['constraints_if'][current_constraint_if]) == set(current_constraint_tested['constraints_if'][current_constraint_if]):
+#                                 if current_constraint_if not in constraint_if_deleted[name_constraint] and current_constraint_if not in constraint_to_add[name_constraint]['constraints_if']:
+#                                     constraint_to_add[name_constraint]['constraints_if'][current_constraint_if] = current_constraint['constraints_if'][current_constraint_if][0]    # TODO [0] not sure
+#                             # else, constraints are contradicting, if already in the liste, we delete it
+#                             else:
+
+#                                 # we append this to never use for this constraint the constraint_if
+#                                 constraint_if_deleted[name_constraint].append(current_constraint_if)
+                                
+#                                 if current_constraint_if in constraint_to_add[name_constraint]['constraints_if']:
+#                                     del constraint_to_add[name_constraint]['constraints_if'][current_constraint_if]
+#                         else:
+#                             constraint_to_add[name_constraint]['constraints_if'][current_constraint_if] = current_constraint['constraints_if'][current_constraint_if][0]  # TODO [0] not sure
+                
+#                 # if name_constraint in constraint_everywhere, then we need that constraint is in all examples found
+#                 # if not, we delete it
+#                 elif name_constraint in constraint_everywhere:
+#                     if name_constraint not in constraint_visited:
+#                         constraint_visited.append(name_constraint)
+#                     del constraint_to_add[name_constraint]
+#                     break
+
+#     return constraint_to_add                 
