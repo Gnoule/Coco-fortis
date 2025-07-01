@@ -9,7 +9,7 @@ example = ['39a8645d','28bf18c6','27a28665','25d487eb','08ed6ac7','7f4411dc']
 
 #3de23699 3906de3d
 data = None
-with open('training/39a8645d.json') as json_file:
+with open('training/3de23699.json') as json_file:
     data = json.load(json_file)
 
 

@@ -25,5 +25,5 @@ def CreateResult(CP_result, input_grid):
         input_graph.ResizeGrid(size, size)
     else:
         size_x, size_y = input_graph.ResizeGridOnNodes()
-        input_graph.ResizeGrid(size_x, size_y)
+        #input_graph.ResizeGrid(size_x, size_y)
     return input_graph
