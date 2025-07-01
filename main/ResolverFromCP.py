@@ -21,9 +21,9 @@ def CreateResult(CP_result, input_grid):
             input_graph.MoveNode(nodes[i], CP_result["nodex_offset_x"][i], CP_result["nodex_offset_y"][i])
             input_graph.RecolorNode(nodes[i], CP_result["nodex_color"][i])
 
-    input_graph.ResizeGrid(size)
-        # "nodex_offset_x": values(nodex_offset_x),
-        #     "nodex_offset_y": values(nodex_offset_y),
-        #     "nodex_color": values(nodex_color),
-        #     "nodex_active":values(nodex_active)
+    if (CP_result['grid_size_active']):
+        input_graph.ResizeGrid(size, size)
+    else:
+        size_x, size_y = input_graph.ResizeGridOnNodes()
+        input_graph.ResizeGrid(size_x, size_y)
     return input_graph

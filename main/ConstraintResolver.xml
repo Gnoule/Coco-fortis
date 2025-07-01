@@ -1,0 +1,11 @@
+<instance format="XCSP3" type="CSP">
+  <variables>
+    <array id="nodex_active" size="[9]"> 0 1 </array>
+  </variables>
+  <constraints>
+    <sum>
+      <list> nodex_active[] </list>
+      <condition> (ge,1) </condition>
+    </sum>
+  </constraints>
+</instance>

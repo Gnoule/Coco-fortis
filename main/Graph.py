@@ -7,16 +7,21 @@ from matplotlib import colors
 from collections import defaultdict
 from matplotlib import colors
 import json
+import copy
+from math import sqrt
+from collections import deque
 
 class Graph:
 
-    def __init__(self, grid):
+    def __init__(self, grid, graph_type="COLOR"):
         self.nodes = []
         self.grid = grid
         # first, we create the nodes (by giving the type of graph construction)
-        self.CreateNode(grid, 'NEIGHBOR')
+        self.CreateNode(grid, graph_type)
         #then, we create the edges of the graph
         self.CreateEdges(grid)
+        # we then check special properties
+        self.CheckProperties()
         # print(self.HasDuplicateShapes())
         self.active = True
 
@@ -41,10 +46,10 @@ class Graph:
                 if type == "NEIGHBOR":
                     pixel_color_found[(x,y)] = pixel_value
                     self.CreateNodeWithNeighbors(grid, [x,y], pixel_found, pixel_color_found, pos_already_visited)
-                    node = Node(pixel_found, pixel_color_found) 
+                    node = Node(pixel_found, pixel_color_found, name=len(self.nodes)) 
                 elif type == "COLOR":
                     self.CreateNodeWithColor(grid, [x,y], pixel_found, pixel_value, pos_already_visited)
-                    node = Node(pixel_found, color=pixel_value) 
+                    node = Node(pixel_found, color=pixel_value, name=len(self.nodes)) 
                 # end of the search, we add the pixels to the node created
                 self.nodes.append(node)
         print(pos_already_visited)
@@ -132,8 +137,9 @@ class Graph:
         for node in self.nodes:
             # get all pixel for this node
             pixels = node.GetPixelPositions()
+            index_pos = -1
             for pos in pixels:
-
+                index_pos += 1
                 # we do 4 for: in for left, right, up, down
                 # we will check in all direction if there is a pixel, if yes, we check for the associated node (with pixels_associated)
 
@@ -145,7 +151,7 @@ class Graph:
                         if pos_tested in pixels_associated:
                             diff = x - pos[0]
                             # we associate current node to the node found
-                            node.AddAssociatedNode(pixels_associated[pos_tested], "HORIZONTAL", diff)
+                            node.AddAssociatedNode(index_pos, pixels_associated[pos_tested], "HORIZONTAL", [diff, 0])
                             break 
                 
                 # LEFT DIRECTION
@@ -154,7 +160,7 @@ class Graph:
                     if (grid[pos_tested[1]][pos_tested[0]] != 0 and pos_tested not in pixels):
                         if pos_tested in pixels_associated:
                             diff = pos[0] - x
-                            node.AddAssociatedNode(pixels_associated[pos_tested], "HORIZONTAL", diff)
+                            node.AddAssociatedNode(index_pos, pixels_associated[pos_tested], "HORIZONTAL", [-diff, 0])
                             break
 
                 # DOWN DIRECTION        
@@ -163,7 +169,7 @@ class Graph:
                     if (grid[pos_tested[1]][pos_tested[0]] != 0 and pos_tested not in pixels):
                         if pos_tested in pixels_associated:
                             diff = y - pos[1]
-                            node.AddAssociatedNode(pixels_associated[pos_tested], "VERTICAL", diff)
+                            node.AddAssociatedNode(index_pos, pixels_associated[pos_tested], "VERTICAL", [0, diff])
                             break
 
                 # UP DIRECTION        
@@ -172,9 +178,102 @@ class Graph:
                     if (grid[pos_tested[1]][pos_tested[0]] != 0 and pos_tested not in pixels):
                         if pos_tested in pixels_associated:
                             diff = pos[1] - y
-                            node.AddAssociatedNode(pixels_associated[pos_tested], "VERTICAL", diff)
+                            node.AddAssociatedNode(index_pos, pixels_associated[pos_tested], "VERTICAL", [0, -diff])
                             break
         print(self.nodes)
+
+
+
+    def node_signature(self, nodes):
+        return tuple(sorted(id(n) for n in nodes))
+
+
+    def CheckProperties(self):
+        centered = []
+        all_visited = []
+        for node in self.nodes:
+            if node in all_visited:
+                continue
+            association = node.GetAssociatedNode()
+            result, path = self.CheckGroup(node, association, [], all_visited)
+            if result:
+                path.append(node)
+                min_x_found = path[0].GetPixelPositions()[0][0]
+                max_x_found = path[0].GetPixelPositions()[0][0]
+                min_y_found = path[0].GetPixelPositions()[0][1]
+                max_y_found = path[0].GetPixelPositions()[0][1]
+                for n in path:
+                    all_visited.append(n)
+                    for pos in n.GetPixelPositions():
+                        if pos[0] < min_x_found:
+                            min_x_found = pos[0]
+                        if pos[1] < min_y_found:
+                            min_y_found = pos[1]
+                        if pos[0] > max_x_found:
+                            max_x_found = pos[0]
+                        if pos[1] > max_y_found:
+                            max_y_found = pos[1]
+                        
+                print("for node =", node, "FOUND CENTERED !!!", path)
+                centered.append({
+                    "position": {
+                        "min_x_found": min_x_found,
+                        "min_y_found": min_y_found,
+                        "max_x_found": max_x_found,
+                        "max_y_found": max_y_found,
+                    },
+                    "nodes": path
+                })
+
+        for center in centered:
+            all_node_found = [] 
+            for node in self.nodes:
+                if node in center['nodes']:
+                    continue
+                found = True
+                for pos in node.GetPixelPositions():
+                        if (pos[0] < center["position"]["min_x_found"] or pos[0] > center["position"]["max_x_found"] 
+                         or pos[1] < center["position"]["min_y_found"] or pos[1] > center["position"]["max_y_found"]):
+                            found = False
+                            break
+                if found:
+                    node.SetCenteredInNodes(True)
+                    all_node_found.append(node)
+                    print("success", node)   
+
+            # we connect all found node together 
+            for node_found in all_node_found:
+                for next_found in all_node_found:
+                    delta_x = (next_found.GetPixelPositions()[0][0] - node_found.GetPixelPositions()[0][0]) 
+                    delta_y = (next_found.GetPixelPositions()[0][1] - node_found.GetPixelPositions()[0][1])
+                    dist = sqrt(delta_x**2 + delta_y**2)
+                    if delta_x > 0 and delta_y > 0:
+                        node_found.AddAssociatedNode(0, next_found, "DIAGONALE", [delta_x, delta_y])   
+
+    
+    def CheckGroup(self, origin_node, associations, path, global_visited):
+        for association in associations:
+            node = association[1]
+            if node in path or node in global_visited:
+                continue
+            new_path = []
+            for i in path:
+                new_path.append(i)
+            if node == origin_node and len(new_path) > 1:
+                return (True, new_path)
+            elif node != origin_node:
+                new_path.append(node)
+            elif node == origin_node and len(new_path) <= 1:
+                continue
+            
+            next_associations = node.GetAssociatedNode()
+            result, found_path = self.CheckGroup(origin_node, next_associations, new_path, global_visited)
+            if result:
+                return (True, found_path)
+        return (False, None)
+
+
+            
 
 
     def GetNodePositions(self):
@@ -190,7 +289,7 @@ class Graph:
         for node in nodes:
             G.add_node(node, color=node.color, size=node.size)
 
-            for neighbor, direction in node.associated_nodes:
+            for neighbor, direction, dist in node.associated_nodes:
                 G.add_node(neighbor, color=neighbor.color, size=neighbor.size)
                 G.add_edge(node, neighbor, label=direction)
         
@@ -277,6 +376,13 @@ class Graph:
     def SetNewGrid(self, new_grid):
         self.grid = new_grid
 
+    def CheckIfPosEmpty(self, x, y):
+        if x >= len(self.grid[0]) or x < 0 or y >= len(self.grid) or y < 0:
+            return True
+        if self.grid[y][x] == 0:
+            return True
+        return False
+
     # TODO
     def GetNumberNodes(self):
         return len(self.nodes)
@@ -327,6 +433,35 @@ class Graph:
             "matches": match_list,
             "match_count": len(match_list),
         }
+    
+    @staticmethod
+    def CompareConnectionsBetweenGraphs(input_node, output_node, output_graph):
+        if len(input_node.GetAssociatedNode()) == 0:
+            return False
+        for connection_input in input_node.GetAssociatedNode():
+            dir = connection_input[2] 
+            diff = connection_input[3]
+            size = connection_input[1].GetSize()
+            current_x = output_node.GetPixelPositions()[connection_input[0]][0] + diff[0]
+            current_y = output_node.GetPixelPositions()[connection_input[0]][1] + diff[1]
+            if output_graph.CheckIfPosEmpty(current_x, current_y):
+                return False
+                
+        return True
+            
+        #     for connection_output in output_node.GetAssociatedNode():
+        #         # if true, the connected node is "probably" the same than input
+        #         if (connection_output[1] == dir and 
+        #         connection_output[0].GetSize() == size and 
+        #         connection_output[2] == diff):
+        #             found = True
+        #             break
+        #     if not found:
+        #         return False
+        # return True
+        
+        
+
 
     
     @staticmethod
@@ -652,6 +787,84 @@ class Graph:
                     return involved_inputs, node_out  # Return all involved nodes and merged output node
 
         return None, None
+    
+
+    @staticmethod
+    def extract_shapes_with_value(grid):
+
+        visited = [[False] * len(row) for row in grid]
+        shapes = []
+
+        def bfs(y, x, value):
+            queue = deque([(y, x)])
+            coords = []
+
+            while queue:
+                cy, cx = queue.popleft()
+                if (0 <= cy < len(grid) and
+                    0 <= cx < len(grid[cy]) and
+                    not visited[cy][cx] and
+                    grid[cy][cx] == value):
+                    visited[cy][cx] = True
+                    coords.append((cy, cx))
+                    for dy, dx in [(-1,0),(1,0),(0,-1),(0,1)]:
+                        queue.append((cy + dy, cx + dx))
+            return coords
+
+        for y in range(len(grid)):
+            for x in range(len(grid[y])):
+                if not visited[y][x]:
+                    val = grid[y][x]
+                    shape_coords = bfs(y, x, val)
+                    if len(shape_coords) > 1:
+                        min_y = min(c[0] for c in shape_coords)
+                        min_x = min(c[1] for c in shape_coords)
+                        normalized = sorted([(cy - min_y, cx - min_x) for cy, cx in shape_coords])
+                        shapes.append((val, normalized))
+        return shapes
+
+
+    @staticmethod
+    def CompareFinalGrid(first_grid, second_grid):
+        shapes1 = Graph.extract_shapes_with_value(first_grid)
+        shapes2 = Graph.extract_shapes_with_value(second_grid)
+        matched = [False] * len(shapes2)
+
+        full_matches = 0
+        partial_matches = 0
+
+        for val1, form1 in shapes1:
+            found = False
+            for i, (val2, form2) in enumerate(shapes2):
+                if not matched[i] and form1 == form2:
+                    matched[i] = True
+                    found = True
+                    if val1 == val2:
+                        full_matches += 1
+                    else:
+                        partial_matches += 1
+                    break
+            # Si pas trouvé : 0 point
+
+        total = len(shapes1)
+        if total == 0:
+            return 0 if len(shapes2) > 0 else 100
+
+        score = ((full_matches * 1.0) + (partial_matches * 0.7)) / total * 100
+        return round(score, 2)
+
+    
+
+
+    
+
+
+
+
+
+
+
+
 
     #### FUNCTION POUR MODIFIER LE GRAPH APRES COUP ####
 
@@ -660,7 +873,7 @@ class Graph:
         pass
 
     def DeactivateNode(self, node):
-        #node.DeactivateNode()
+        node.DeactivateNode()
         all_pos = node.GetPixelPositions()
         for pos in all_pos:
             self.grid[pos[1]][pos[0]] = 0
@@ -681,11 +894,25 @@ class Graph:
             self.grid[pos[1]][pos[0]] = color
 
 
-    def ResizeGrid(self, size):
+    def ResizeGrid(self, size_x, size_y):
         new_grid = []
-        for y in range (size):
+        for y in range (size_y):
             grid_inter = []
-            for x in range (size):
+            for x in range (size_x):
                 grid_inter.append(self.grid[y][x])
             new_grid.append(grid_inter)
         self.grid = new_grid
+
+    def ResizeGridOnNodes(self):
+        max_x_found = self.nodes[0].GetPixelPositions()[0][0]
+        max_y_found = self.nodes[0].GetPixelPositions()[0][1]
+        for node in self.nodes:
+            if node.GetActiveStatus() == False:
+                continue
+            for pos in node.GetPixelPositions():
+                if pos[0] > max_x_found:
+                    max_x_found = pos[0]
+                if pos[1] > max_y_found:
+                    max_y_found = pos[0]
+        return max_x_found+1, max_y_found
+
