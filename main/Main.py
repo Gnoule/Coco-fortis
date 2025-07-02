@@ -16,7 +16,7 @@ data = None
 
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-json_path = os.path.join(project_root, "training", "7f4411dc.json")
+json_path = os.path.join(project_root, "training", "3de23699.json")
 
 with open(json_path) as json_file:
     data = json.load(json_file)
@@ -24,136 +24,10 @@ with open(json_path) as json_file:
 
 training_examples = data['train']
 
-#print(training_examples[2]['input'])
-#graph = Graph(training_examples[2]['input'])
-#graph.ShowGrid()
-# input_example = training_examples[0]['input']
-# output_example = training_examples[0]['output']
-
-
-# input_example1 = [
-#     [0, 1, 0, 0, 0, 0, 0],
-#     [1, 1, 1, 0, 0, 0, 0],
-#     [0, 1, 0, 0, 1, 0, 0],
-#     [0, 0, 0, 1, 1, 1, 0],
-#     [0, 0, 0, 0, 1, 0, 0],
-#     [0, 0, 0, 0, 0, 0, 0],
-#     [0, 0, 0, 0, 0, 0, 0],
-# ]
-
-# output_example1 = [
-#     [0, 1, 0, 0, 0, 0, 0],
-#     [1, 1, 1, 0, 0, 0, 0],
-#     [0, 1, 0, 0, 1, 0, 0],
-#     [0, 1, 1, 1, 1, 1, 0],
-#     [0, 0, 0, 0, 1, 0, 0],
-#     [0, 0, 0, 0, 0, 0, 0],
-#     [0, 0, 0, 0, 0, 0, 0],
-# ]
-
-# input_example2 = [
-#     [0, 0, 2, 0, 0, 0, 0],
-#     [0, 2, 2, 2, 0, 0, 0],
-#     [0, 0, 2, 0, 0, 2, 0],
-#     [0, 0, 0, 0, 2, 2, 2],
-#     [0, 0, 0, 0, 0, 2, 0],
-#     [0, 1, 0, 0, 0, 0, 0],
-#     [0, 0, 0, 0, 0, 0, 0],
-# ]
-
-# output_example2 = [
-#     [0, 0, 0, 0, 0, 0, 0],
-#     [0, 0, 0, 0, 0, 0, 0],
-#     [0, 0, 0, 3, 0, 0, 0],
-#     [0, 0, 3, 3, 3, 0, 0],
-#     [0, 0, 0, 3, 0, 0, 0],
-#     [0, 0, 0, 0, 0, 0, 0],
-#     [0, 0, 0, 0, 0, 0, 0],
-# ]
-
-
-# evaluation_example = [
-#     [0, 4, 0, 0, 0, 4, 0],
-#     [4, 4, 4, 0, 4, 4, 4],
-#     [0, 0, 0, 0, 0, 0, 0],
-#     [1, 0, 0, 0, 0, 0, 0],
-#     [1, 0, 0, 4, 0, 0, 1],
-#     [0, 0, 4, 4, 4, 0, 1],
-#     [0, 0, 0, 0, 0, 0, 0],
-# ]
-
-# input_example1 = [
-#     [0, 1, 0, 0, 0, 1, 0],
-#     [1, 1, 1, 0, 0, 0, 0],
-#     [0, 1, 0, 0, 1, 0, 0],
-#     [0, 0, 0, 1, 1, 1, 0],
-#     [0, 0, 0, 0, 1, 0, 0],
-#     [0, 0, 0, 0, 0, 0, 0],
-#     [0, 0, 0, 0, 0, 0, 0],
-# ]
-
-# output_example1 = [
-#     [0, 0, 0, 0, 0, 0, 0],
-#     [0, 0, 0, 0, 0, 0, 0],
-#     [0, 0, 0, 3, 0, 0, 0],
-#     [0, 0, 3, 3, 3, 0, 0],
-#     [0, 0, 0, 3, 0, 0, 0],
-#     [0, 0, 0, 0, 0, 0, 0],
-#     [0, 0, 0, 0, 0, 0, 0],
-# ]
-
-# input_example2 = [
-#     [0, 0, 2, 0, 0, 0, 0],
-#     [0, 2, 2, 2, 0, 0, 0],
-#     [0, 0, 2, 0, 0, 2, 0],
-#     [0, 0, 0, 0, 2, 2, 2],
-#     [0, 0, 0, 0, 0, 2, 0],
-#     [0, 1, 0, 0, 0, 0, 0],
-#     [0, 0, 0, 0, 0, 0, 0],
-# ]
-
-# output_example2 = [
-#     [0, 0, 0, 0, 0, 0, 0],
-#     [0, 0, 0, 0, 0, 0, 0],
-#     [0, 0, 0, 3, 0, 0, 0],
-#     [0, 0, 3, 3, 3, 0, 0],
-#     [0, 0, 0, 3, 0, 0, 0],
-#     [0, 0, 0, 0, 0, 0, 0],
-#     [0, 0, 0, 0, 0, 0, 0],
-# ]
-
-
-# evaluation_example = [
-#     [0, 4, 0, 0, 0, 4, 0],
-#     [4, 4, 4, 0, 4, 4, 4],
-#     [0, 0, 0, 0, 0, 0, 0],
-#     [1, 0, 0, 0, 0, 0, 0],
-#     [1, 0, 0, 4, 0, 0, 1],
-#     [0, 0, 4, 4, 4, 0, 1],
-#     [0, 0, 0, 0, 0, 0, 0],
-# ]
-
-# evaluation_example2 = [
-#     [0, 4, 0, 0, 0, 4, 0],
-#     [4, 4, 4, 0, 4, 4, 4],
-#     [0, 0, 0, 0, 0, 0, 0],
-#     [1, 0, 0, 0, 0, 0, 0],
-#     [1, 0, 0, 4, 0, 0, 1]
-# ]
-
-# s = Graph.CompareFinalGrid(evaluation_example, evaluation_example2)
-# print("s = ", s)
-
-
 
 def Finder(examples, evaluation):
     constraints_brut = []
     startTime = datetime.now()
-    # input = Graph(examples[3]['input'])
-    # FindConstraintFromExample(examples[3]['input'], examples[3]['output'])
-    # input.ShowGraph()
-    # input.ShowGrid()
-
 
     # constraints_brut.append(FindConstraintFromExample(examples[4]['input'], examples[4]['output']))
     # print()
@@ -173,6 +47,8 @@ def Finder(examples, evaluation):
         graph.ShowGrid()
 
 
+
+# for testing one task (needed one more example)
 
 test_3de23699 = {"train": [{"input": [[0, 0, 0, 0, 0, 0, 0], 
                       [0, 4, 0, 0, 0, 4, 0], 
@@ -267,8 +143,8 @@ test_3de23699 = {"train": [{"input": [[0, 0, 0, 0, 0, 0, 0],
 
 
 
-#Finder(test_3de23699['train'], test_3de23699['test'])
-Finder(data['train'], data['test'])
+Finder(test_3de23699['train'], test_3de23699['test'])
+#Finder(data['train'], data['test'])
 
 # input_example2 = [
 #     [0, 2, 0, 0, 0, 0, 0],

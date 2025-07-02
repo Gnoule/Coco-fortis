@@ -215,9 +215,9 @@ def Resolver(final_constraint, input_grid):
 
 
 
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    if solve(solver="ace") is SAT:
-        print("----------------------On solve--------------------------------")
+    # os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    # if solve(solver="ace") is SAT:
+    #     print("----------------------On solve--------------------------------")
     
     if solve(solver="choco"):
 
